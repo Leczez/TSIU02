@@ -1,0 +1,33 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.1.57</VERSION>
+ <DEVICE>"ATmega16"</DEVICE>
+ <WORKING_DIR>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\Lab0\lab0\lab0\Debug</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR Assembler\Native\2.1.1175\avrassembler\Include</DIR>
+  <DIR></DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\Lab0\lab0\lab0\lab0.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR Assembler\Native\2.1.1175\avrassembler\Include\m16def.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\Lab0\lab0\lab0\Debug/lab0.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>lab0.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>lab0.map</FILE>
+  <FILE>lab0.lss</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <INIT><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\Lab0\lab0\lab0\lab0.asm</FILE><LINE>39</LINE></INIT>
+  <FOREVER><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\Lab0\lab0\lab0\lab0.asm</FILE><LINE>19</LINE></FOREVER>
+  <LOOP><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\Lab0\lab0\lab0\lab0.asm</FILE><LINE>21</LINE></LOOP>
+  <DELAY><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\Lab0\lab0\lab0\lab0.asm</FILE><LINE>45</LINE></DELAY>
+  <NOT_10><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\Lab0\lab0\lab0\lab0.asm</FILE><LINE>31</LINE></NOT_10>
+  <D_3><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\Lab0\lab0\lab0\lab0.asm</FILE><LINE>47</LINE></D_3>
+  <D_2><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\Lab0\lab0\lab0\lab0.asm</FILE><LINE>49</LINE></D_2>
+  <D_1><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\Lab0\lab0\lab0\lab0.asm</FILE><LINE>51</LINE></D_1>
+ </LABELS>
+</ASSEMBLER_INFO>
