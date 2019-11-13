@@ -6,6 +6,11 @@
  */ 
 
 INIT:
+	ldi r25,HIGH(RAMEND); set stack
+	out SPH,r25; for calls
+	ldi r25,LOW(RAMEND);
+	out SPL,r25
+
 	ldi r25,$ff
 	out DDRB,r25
 	ldi r25,$00
