@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab1\lab1\lab1.asm Tue Nov 12 18:02:54 2019
+AVRASM ver. 2.2.7  C:\Users\Linus\github\TSIU02\lab1\lab1\lab1.asm Wed Nov 13 16:41:42 2019
 
 
 EQU  SIGNATURE_000 0000001e
@@ -605,8 +605,9 @@ EQU  OC0addr      00000026
 EQU  SPMRaddr     00000028
 EQU  INT_VECTORS_SIZE 0000002a
 CSEG INIT         00000000
-CSEG IDLE         00000004
-CSEG GET_DATA     00000010
-CSEG DELAY        00000007
-CSEG DelayYttreLoop 00000009
-CSEG DelayInreLoop 0000000a
+CSEG IDLE         00000007
+CSEG GET_DATA     00000015
+CSEG DELAY        0000000c
+CSEG DelayYttreLoop 0000000e
+CSEG DelayInreLoop 0000000f
+CSEG PRINT        0000001f

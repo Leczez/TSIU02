@@ -7,14 +7,17 @@
 
 INIT:
 	ldi r25,$ff
-	out DDRB,r15
+	out DDRB,r25
 	ldi r25,$00
-	out DDRA, r15
-
+	out DDRA, r25
+	ldi r21,$04; räknare
+	clr r20 ; nummer
+	clr r22 ; delay eller inte 1/0
 
 IDLE:
-	breq GET_DATA
+	sbis PINA,0
 	jmp IDLE
+	jmp GET_DATA
 
 
 DELAY:
@@ -28,12 +31,18 @@ DelayInreLoop:
 	dec r16;
 	brne DelayYttreLoop
 	cbi PORTB,7
-	ret
+	inc r22;
 
 GET_DATA:
-	clr r19
+	sbrs r22,0
+	call DELAY
+	dec r22
 	in r19,PINA0
-	Call DELAY
-	brne GET_DATA
-	out PORTB,r19
-	ret
+	add r20,r19
+	dec r21
+	breq PRINT
+	jmp GET_DATA
+
+PRINT:
+	out PORTB,r20
+	jmp IDLE
