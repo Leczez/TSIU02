@@ -22,7 +22,8 @@ SETUP:
 
 	ldi r20,$00 ; räknare
 	ldi r21,$00 ; räknare 2
-	clr r17 ; OUTPUT
+	clr r17 ; BEEP BINARY
+	clr r23 ; BEEP OUTPUT
 	adiw Z,$00 ;pekare
 
 
@@ -88,6 +89,27 @@ RETURN:
 	pop ZH
 	ret
 
+SEND:
+	mov r23, r17
+	call GET_BIT
+	call SEND_BITS
+	ret
+
+GET_BIT:
+	rol r23
+	ret
+
+SEND_BITS:
+	call BIT
+	ret
+
+BIT:
+	call BEEP
+	call NOBEEP
+	call GET_BIT
+	;lägg till skip instruktion här!!!!
+	jmp BIT
+	ret
 
 MESSAGE:
 	;.org 100
