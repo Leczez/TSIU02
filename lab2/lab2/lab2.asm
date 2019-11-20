@@ -17,7 +17,7 @@ SETUP:
 	ldi ZH,HIGH(MESSAGE*2)
 	ldi ZL,LOW(MESSAGE*2)
 
-	ldi r16,$01
+	ldi r16,$ff
 	out DDRB,r16
 
 	ldi r20,$00 ; räknare
@@ -30,7 +30,8 @@ SETUP:
 MAIN:
 	call GET_CHAR
 	call SEND_CHAR
-	inc r20
+	clr r20
+	clr r21
 	jmp MAIN
 
 ; Hämtar en character från program minnet
@@ -44,17 +45,20 @@ GET_CHAR:
 RESET_Z:
 	ldi ZH,HIGH(MESSAGE*2)
 	ldi ZL,LOW(MESSAGE*2)
+	jmp MAIN
 
 SEND_CHAR:
 	call BEEP_CHAR
+	clr r20
+	clr r21
 	call GET_CHAR	
 	jmp SEND_CHAR
 
 
 BEEP_CHAR:
 	call LOOKUP
-	;call SEND
-	;call NOBEEP
+	call SEND
+	call NOBEEP
 	ret
 
 LOOKUP:
@@ -63,7 +67,6 @@ LOOKUP:
 	ldi ZH,HIGH(ASCII*2) ; kanske gånger 2
 	ldi ZL,LOW(ASCII*2)
 FIND_ASCII:
-	
 	lpm r18,Z
 	cp r16,r18
 	breq LOOKUP_BIT
@@ -72,8 +75,8 @@ FIND_ASCII:
 	jmp FIND_ASCII
 
 LOOKUP_BIT:
-	ldi ZH,HIGH(BIT*2) ; kanske gånger 2
-	ldi ZL,LOW(BIT*2)
+	ldi ZH,HIGH(HEX*2) ; kanske gånger 2
+	ldi ZL,LOW(HEX*2)
 
 FIND_BIT:
 	cp r20,r21
@@ -90,13 +93,13 @@ RETURN:
 	ret
 
 SEND:
-	mov r23, r17
+	mov r25, r17
 	call GET_BIT
 	call SEND_BITS
 	ret
 
 GET_BIT:
-	rol r23
+	lsl r17
 	ret
 
 SEND_BITS:
@@ -107,8 +110,51 @@ BIT:
 	call BEEP
 	call NOBEEP
 	call GET_BIT
-	;lägg till skip instruktion här!!!!
+	cpi r17,$00	;lägg till skip instruktion här!!!!
+	breq RETURN_BIT
 	jmp BIT
+RETURN_BIT:
+	ret
+
+BEEP:
+	cpi r25,$01
+	breq BLANKSPACE 
+	brcs LONG_BEEP
+	brcc SHORT_BEEP
+
+LONG_BEEP:
+	sbi PORTB,0
+	;; behöver manipulera yttre delayvärdet
+	call DELAY
+	cbi PORTB,0
+	ret
+SHORT_BEEP:
+	sbi PORTB,0
+	;; behöver manipulera yttre delayvärdet
+	call DELAY
+	cbi PORTB,0
+	ret
+
+BLANKSPACE:
+	;; 7N
+	call DELAY
+	ret
+
+NOBEEP:
+	;; behöver manipulera yttre delayvärdet
+	call DELAY
+	;; återställa yttre delayvärdet
+	ret
+
+DELAY:
+	ldi r23,$FF
+DELAY1:
+	ldi r24,$0F
+DELAY2:
+	dec r24
+	brne DELAY2
+	dec r23
+	brne DELAY1
 	ret
 
 MESSAGE:
@@ -116,8 +162,8 @@ MESSAGE:
 	.db "SOS",$00
 ASCII:
 	;.org 100
-	.db $41,$42,$43,$44,$45,$46,$47,$48,$49,$4A,$4B,$4C,$4D,$4E,$4F,$50,$51,$52,$53,$54,$55,$56,$57,$58,$59,$5A,$00
+	.db $20,$41,$42,$43,$44,$45,$46,$47,$48,$49,$4A,$4B,$4C,$4D,$4E,$4F,$50,$51,$52,$53,$54,$55,$56,$57,$58,$59,$5A,$00
 
-BIT:
+HEX:
 	;.org 100
-	.db $60,$88,$A8,$90,$40,$28,$D0,$08,$20,$78,$B0,$48,$E0,$A0,$F0,$68,$D8,$50,$10,$C0,$30,$18,$70,$98,$B8,$C8,$00
+	.db $01,$60,$88,$A8,$90,$40,$28,$D0,$08,$20,$78,$B0,$48,$E0,$A0,$F0,$68,$D8,$50,$10,$C0,$30,$18,$70,$98,$B8,$C8,$00
