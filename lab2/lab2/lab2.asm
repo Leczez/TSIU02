@@ -58,6 +58,7 @@ SEND_CHAR:
 BEEP_CHAR:
 	call LOOKUP
 	call SEND
+	ldi r26,80
 	call NOBEEP
 	ret
 
@@ -108,9 +109,10 @@ SEND_BITS:
 
 BIT:
 	call BEEP
+	ldi r26,10
 	call NOBEEP
 	call GET_BIT
-	cpi r17,$00	;lägg till skip instruktion här!!!!
+	cpi r17,$00
 	breq RETURN_BIT
 	jmp BIT
 RETURN_BIT:
@@ -118,43 +120,56 @@ RETURN_BIT:
 
 BEEP:
 	cpi r25,$01
+	;ldi r27,25
 	breq BLANKSPACE 
 	brcs LONG_BEEP
-	brcc SHORT_BEEP
-
-LONG_BEEP:
-	sbi PORTB,0
-	;; behöver manipulera yttre delayvärdet
-	call DELAY
-	cbi PORTB,0
-	ret
+;	brcc SHORT_BEEP
 SHORT_BEEP:
-	sbi PORTB,0
-	;; behöver manipulera yttre delayvärdet
-	call DELAY
+	ldi r27,10
+	call SOUND
+	ldi r26,10
+	jmp	BEEPAT
+LONG_BEEP:
+	ldi r27,30
+	call SOUND
+	ldi r26,30
+BEEPAT:
+	;call DELAY
 	cbi PORTB,0
 	ret
+
 
 BLANKSPACE:
-	;; 7N
-	call DELAY
-	ret
+	ldi r26,255
+	jmp BEEPAT
 
 NOBEEP:
-	;; behöver manipulera yttre delayvärdet
 	call DELAY
-	;; återställa yttre delayvärdet
 	ret
 
 DELAY:
-	ldi r23,$FF
+	;ldi r23,$0A
 DELAY1:
-	ldi r24,$0F
+	ldi r24,$1F
 DELAY2:
 	dec r24
 	brne DELAY2
-	dec r23
+	dec r26
 	brne DELAY1
+	ret
+
+SOUND:
+	ldi r28,$1F
+	sbi PORTB,0
+	ldi r26,10
+	call DELAY
+	cbi PORTB,0
+SOUND1:
+	dec r28
+	brne SOUND1
+	dec r27
+	brne SOUND
+	
 	ret
 
 MESSAGE:
