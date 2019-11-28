@@ -6,11 +6,16 @@
  *   Author: lincl896
  */ 
 
+ .equ N = 60
+ .equ BEEPTIME = 40
+ .equ SPEED = 10
+
+
 SETUP:
 	;ställer in IO Pinnar och laddar program minnet
 	
 	ldi r25,HIGH(RAMEND); set stack
-	out SPH,r25; for calls
+	out SPH,r25; for rcalls
 	ldi r25,LOW(RAMEND);
 	out SPL,r25
 
@@ -28,38 +33,51 @@ SETUP:
 
 
 MAIN:
-	call GET_CHAR
-	call SEND_CHAR
+	ldi ZH,HIGH(MESSAGE*2)
+	ldi ZL,LOW(MESSAGE*2)
+NEXT:
+	rcall GET_CHAR
+	cpi r16,$00
+	breq MAIN;RESET_Z
+	rcall SEND_CHAR
+
 	clr r20
 	clr r21
-	jmp MAIN
+	rjmp NEXT
+
+/*RESET_Z:
+	ldi ZH,HIGH(MESSAGE*2)
+	ldi ZL,LOW(MESSAGE*2)
+	rjmp MAIN*/
 
 ; Hämtar en character från program minnet
 GET_CHAR:
-	lpm r16,Z
-	adiw Z,1
-	cpi r16,$00
-	breq RESET_Z
+	lpm r16,Z+
+	;adiw Z,1
+	/*cpi r16,$00
+	breq RESET_Z*/
 	ret
 
-RESET_Z:
-	ldi ZH,HIGH(MESSAGE*2)
-	ldi ZL,LOW(MESSAGE*2)
-	jmp MAIN
+
 
 SEND_CHAR:
-	call BEEP_CHAR
+	rcall BEEP_CHAR
 	clr r20
 	clr r21
-	call GET_CHAR	
-	jmp SEND_CHAR
-
+	rcall NOSOUND
+	rcall GET_CHAR	
+	rjmp SEND_CHAR
+	ret
 
 BEEP_CHAR:
-	call LOOKUP
-	call SEND
-	ldi r26,80
-	call NOBEEP
+	rcall LOOKUP
+	rcall SEND
+	ldi r26,2*N
+	rcall DELAY ;NOBEEP *2
+	ldi r26,2*N
+	rcall DELAY ;NOBEEP *2
+	ldi r26,2*N
+	rcall DELAY ;NOBEEP *2
 	ret
 
 LOOKUP:
@@ -73,7 +91,7 @@ FIND_ASCII:
 	breq LOOKUP_BIT
 	adiw Z,1
 	inc r20
-	jmp FIND_ASCII
+	rjmp FIND_ASCII
 
 LOOKUP_BIT:
 	ldi ZH,HIGH(HEX*2) ; kanske gånger 2
@@ -85,7 +103,7 @@ FIND_BIT:
 	breq RETURN
 	adiw Z,1
 	inc r21
-	jmp FIND_BIT
+	rjmp FIND_BIT
 
 RETURN:
 	lpm r17,Z
@@ -95,8 +113,8 @@ RETURN:
 
 SEND:
 	mov r25, r17
-	call GET_BIT
-	call SEND_BITS
+	;rcall GET_BIT
+	rcall SEND_BITS
 	ret
 
 GET_BIT:
@@ -104,48 +122,59 @@ GET_BIT:
 	ret
 
 SEND_BITS:
-	call BIT
+	rcall BIT
 	ret
 
 BIT:
-	call BEEP
-	ldi r26,10
-	call NOBEEP
-	call GET_BIT
-	cpi r17,$00
-	breq RETURN_BIT
-	jmp BIT
-RETURN_BIT:
+	rcall BEEP
+	rcall NOSOUND
+	;rcall GET_BIT
+	cpi r17,$80
+	brne BIT
 	ret
 
 BEEP:
 	cpi r25,$01
-	;ldi r27,25
-	breq BLANKSPACE 
+	breq BLANKSPACE
+	lsl r17
 	brcs LONG_BEEP
-;	brcc SHORT_BEEP
+	/*brcc SHORT_BEEP*/
 SHORT_BEEP:
-	ldi r27,10
-	call SOUND
-	ldi r26,10
-	jmp	BEEPAT
+	ldi r27,BEEPTIME
+	rcall SOUND
+	ldi r26,N
+	rjmp	BEEPAT
 LONG_BEEP:
-	ldi r27,30
-	call SOUND
-	ldi r26,30
-BEEPAT:
-	;call DELAY
-	cbi PORTB,0
-	ret
-
-
+	ldi r27,3*BEEPTIME
+	rcall SOUND
+	ldi r26,N
+	rjmp	BEEPAT
 BLANKSPACE:
-	ldi r26,255
-	jmp BEEPAT
-
-NOBEEP:
-	call DELAY
+	ldi r26,2*N
+	rcall DELAY ;NOBEEP *2
+	ldi r26,2*N
+	rcall DELAY ;NOBEEP *2
+	ldi r26,N
+	rcall DELAY ;NOBEEP
+	ldi r17,$80
+	ldi r26,N
+	/*rjmp BEEPAT*/
+/*SHORT_BEEP:
+	ldi r27,BEEPTIME
+	rcall SOUND
+	ldi r26,N
+	rjmp	BEEPAT*/
+/*LONG_BEEP:
+	ldi r27,3*BEEPTIME
+	rcall SOUND
+	ldi r26,N*/
+BEEPAT:
+	rcall DELAY
 	ret
+
+
+
+
 
 DELAY:
 	;ldi r23,$0A
@@ -159,22 +188,43 @@ DELAY2:
 	ret
 
 SOUND:
-	ldi r28,$1F
+;	ldi r28,$1F
 	sbi PORTB,0
-	ldi r26,10
-	call DELAY
+	ldi r26,SPEED
+	rcall DELAY
 	cbi PORTB,0
-SOUND1:
-	dec r28
-	brne SOUND1
+	ldi r26,SPEED
+	rcall DELAY
+;SOUND1:
+;	dec r28
+;	brne SOUND1
 	dec r27
 	brne SOUND
-	
 	ret
+
+NOSOUND:
+	ldi r26,2*N
+	rcall DELAY ;NOBEEP *2
+	ldi r26,2*N
+	rcall DELAY ;NOBEEP *2
+	ldi r26,2*N
+	rcall DELAY ;NOBEEP *2
+	ldi r26,2*N
+	rcall DELAY ;NOBEEP *2
+	ldi r26,2*N
+	rcall DELAY ;NOBEEP *2
+	ldi r26,2*N
+	rcall DELAY ;NOBEEP *2
+	ldi r26,2*N
+	rcall DELAY ;NOBEEP *2
+	ldi r26,2*N
+	rcall DELAY ;NOBEEP *2
+	ret
+
 
 MESSAGE:
 	;.org 100
-	.db "SOS",$00
+	.db "SOS SAAB",$00
 ASCII:
 	;.org 100
 	.db $20,$41,$42,$43,$44,$45,$46,$47,$48,$49,$4A,$4B,$4C,$4D,$4E,$4F,$50,$51,$52,$53,$54,$55,$56,$57,$58,$59,$5A,$00

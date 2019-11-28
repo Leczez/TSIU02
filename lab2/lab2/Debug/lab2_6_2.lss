@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm Wed Nov 20 19:08:42 2019
+AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm Thu Nov 28 19:11:26 2019
 
 [builtin](2): Including file 'C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR Assembler\Native\2.1.1175\avrassembler\Include\m16Adef.inc'
                  
@@ -876,16 +876,21 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\l
                   *   Author: lincl896
                   */ 
                  
+                  .equ N = 60
+                  .equ BEEPTIME = 40
+                  .equ SPEED = 10
+                 
+                 
                  SETUP:
                  	;ställer in IO Pinnar och laddar program minnet
                  	
 000000 e094      	ldi r25,HIGH(RAMEND); set stack
-000001 bf9e      	out SPH,r25; for calls
+000001 bf9e      	out SPH,r25; for rcalls
 000002 e59f      	ldi r25,LOW(RAMEND);
 000003 bf9d      	out SPL,r25
                  
 000004 e0f1      	ldi ZH,HIGH(MESSAGE*2)
-000005 e0e6      	ldi ZL,LOW(MESSAGE*2)
+000005 e0e4      	ldi ZL,LOW(MESSAGE*2)
                  
 000006 ef0f      	ldi r16,$ff
 000007 bb07      	out DDRB,r16
@@ -898,186 +903,217 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\l
                  
                  
                  MAIN:
-00000d 940e 0015 	call GET_CHAR
-00000f 940e 001e 	call SEND_CHAR
-000011 2744      	clr r20
-000012 2755      	clr r21
-000013 940c 000d 	jmp MAIN
+00000d d004      	rcall GET_CHAR
+00000e d00b      	rcall SEND_CHAR
+00000f 2744      	clr r20
+000010 2755      	clr r21
+000011 cffb      	rjmp MAIN
                  
                  ; Hämtar en character från program minnet
                  GET_CHAR:
-000015 9104      	lpm r16,Z
-000016 9631      	adiw Z,1
-000017 3000      	cpi r16,$00
-000018 f009      	breq RESET_Z
-000019 9508      	ret
+000012 9104      	lpm r16,Z
+000013 9631      	adiw Z,1
+000014 3000      	cpi r16,$00
+000015 f009      	breq RESET_Z
+000016 9508      	ret
                  
                  RESET_Z:
-00001a e0f1      	ldi ZH,HIGH(MESSAGE*2)
-00001b e0e6      	ldi ZL,LOW(MESSAGE*2)
-00001c 940c 000d 	jmp MAIN
+000017 e0f1      	ldi ZH,HIGH(MESSAGE*2)
+000018 e0e4      	ldi ZL,LOW(MESSAGE*2)
+000019 cff3      	rjmp MAIN
                  
                  SEND_CHAR:
-00001e 940e 0026 	call BEEP_CHAR
-000020 2744      	clr r20
-000021 2755      	clr r21
-000022 940e 0015 	call GET_CHAR	
-000024 940c 001e 	jmp SEND_CHAR
+00001a d005      	rcall BEEP_CHAR
+00001b 2744      	clr r20
+00001c 2755      	clr r21
+00001d d053      	rcall NOSOUND
+00001e dff3      	rcall GET_CHAR	
+00001f cffa      	rjmp SEND_CHAR
                  
                  
                  BEEP_CHAR:
-000026 940e 002e 	call LOOKUP
-000028 940e 0046 	call SEND
-00002a e5a0      	ldi r26,80
-00002b 940e 006f 	call NOBEEP
-00002d 9508      	ret
+000020 d008      	rcall LOOKUP
+000021 d01d      	rcall SEND
+000022 e7a8      	ldi r26,2*N
+000023 d03e      	rcall DELAY ;NOBEEP *2
+000024 e7a8      	ldi r26,2*N
+000025 d03c      	rcall DELAY ;NOBEEP *2
+000026 e7a8      	ldi r26,2*N
+000027 d03a      	rcall DELAY ;NOBEEP *2
+000028 9508      	ret
                  
                  LOOKUP:
-00002e 93ff      	push ZH
-00002f 93ef      	push ZL
-000030 e0f1      	ldi ZH,HIGH(ASCII*2) ; kanske gånger 2
-000031 e0ea      	ldi ZL,LOW(ASCII*2)
+000029 93ff      	push ZH
+00002a 93ef      	push ZL
+00002b e0f1      	ldi ZH,HIGH(ASCII*2) ; kanske gånger 2
+00002c e0ee      	ldi ZL,LOW(ASCII*2)
                  FIND_ASCII:
-000032 9124      	lpm r18,Z
-000033 1702      	cp r16,r18
-000034 f021      	breq LOOKUP_BIT
-000035 9631      	adiw Z,1
-000036 9543      	inc r20
-000037 940c 0032 	jmp FIND_ASCII
+00002d 9124      	lpm r18,Z
+00002e 1702      	cp r16,r18
+00002f f019      	breq LOOKUP_BIT
+000030 9631      	adiw Z,1
+000031 9543      	inc r20
+000032 cffa      	rjmp FIND_ASCII
                  
                  LOOKUP_BIT:
-000039 e0f1      	ldi ZH,HIGH(HEX*2) ; kanske gånger 2
-00003a e2e6      	ldi ZL,LOW(HEX*2)
+000033 e0f1      	ldi ZH,HIGH(HEX*2) ; kanske gånger 2
+000034 e2ea      	ldi ZL,LOW(HEX*2)
                  
                  FIND_BIT:
-00003b 1745      	cp r20,r21
-00003c 9164      	lpm r22,Z
-00003d f021      	breq RETURN
-00003e 9631      	adiw Z,1
-00003f 9553      	inc r21
-000040 940c 003b 	jmp FIND_BIT
+000035 1745      	cp r20,r21
+000036 9164      	lpm r22,Z
+000037 f019      	breq RETURN
+000038 9631      	adiw Z,1
+000039 9553      	inc r21
+00003a cffa      	rjmp FIND_BIT
                  
                  RETURN:
-000042 9114      	lpm r17,Z
-000043 91ef      	pop ZL
-000044 91ff      	pop ZH
-000045 9508      	ret
+00003b 9114      	lpm r17,Z
+00003c 91ef      	pop ZL
+00003d 91ff      	pop ZH
+00003e 9508      	ret
                  
                  SEND:
-000046 2f91      	mov r25, r17
-000047 940e 004c 	call GET_BIT
-000049 940e 004e 	call SEND_BITS
-00004b 9508      	ret
+00003f 2f91      	mov r25, r17
+                 	;rcall GET_BIT
+000040 d003      	rcall SEND_BITS
+000041 9508      	ret
                  
                  GET_BIT:
-00004c 0f11      	lsl r17
-00004d 9508      	ret
+000042 0f11      	lsl r17
+000043 9508      	ret
                  
                  SEND_BITS:
-00004e 940e 0051 	call BIT
-000050 9508      	ret
+000044 d001      	rcall BIT
+000045 9508      	ret
                  
                  BIT:
-000051 940e 005d 	call BEEP
-000053 e2a8      	ldi r26,40
-000054 940e 006f 	call NOBEEP
-000056 940e 004c 	call GET_BIT
-000058 3010      	cpi r17,$00
-000059 f011      	breq RETURN_BIT
-00005a 940c 0051 	jmp BIT
-                 RETURN_BIT:
-00005c 9508      	ret
+000046 d004      	rcall BEEP
+000047 d029      	rcall NOSOUND
+                 	;rcall GET_BIT
+000048 3810      	cpi r17,$80
+000049 f7e1      	brne BIT
+00004a 9508      	ret
                  
                  BEEP:
-00005d 3091      	cpi r25,$01
-                 	;ldi r27,25
-00005e f069      	breq BLANKSPACE 
-00005f f030      	brcs LONG_BEEP
-                 ;	brcc SHORT_BEEP
-                 SHORT_BEEP:
-000060 e0ba      	ldi r27,10
-000061 940e 0078 	call SOUND
-000063 e0aa      	ldi r26,10
-000064 940c 006a 	jmp	BEEPAT
-                 LONG_BEEP:
-000066 e1be      	ldi r27,30
-000067 940e 0078 	call SOUND
-000069 e1ae      	ldi r26,30
-                 BEEPAT:
-                 	;call DELAY
-00006a 98c0      	cbi PORTB,0
-00006b 9508      	ret
-                 
-                 
+00004b 3091      	cpi r25,$01
+00004c f019      	breq BLANKSPACE
+00004d 0f11      	lsl r17
+00004e f070      	brcs LONG_BEEP
+00004f f448      	brcc SHORT_BEEP
                  BLANKSPACE:
-00006c efaf      	ldi r26,255
-00006d 940c 006a 	jmp BEEPAT
+000050 e7a8      	ldi r26,2*N
+000051 d010      	rcall DELAY ;NOBEEP *2
+000052 e7a8      	ldi r26,2*N
+000053 d00e      	rcall DELAY ;NOBEEP *2
+000054 e3ac      	ldi r26,N
+000055 d00c      	rcall DELAY ;NOBEEP
+000056 e810      	ldi r17,$80
+000057 e3ac      	ldi r26,N
+000058 c007      	rjmp BEEPAT
+                 SHORT_BEEP:
+000059 e2b8      	ldi r27,BEEPTIME
+00005a d00d      	rcall SOUND
+00005b e3ac      	ldi r26,N
+00005c c003      	rjmp	BEEPAT
+                 LONG_BEEP:
+00005d e7b8      	ldi r27,3*BEEPTIME
+00005e d009      	rcall SOUND
+00005f e3ac      	ldi r26,N
+                 BEEPAT:
+000060 d001      	rcall DELAY
+000061 9508      	ret
                  
-                 NOBEEP:
-00006f 940e 0072 	call DELAY
-000071 9508      	ret
+                 
+                 
+                 
                  
                  DELAY:
                  	;ldi r23,$0A
                  DELAY1:
-000072 e18f      	ldi r24,$1F
+000062 e18f      	ldi r24,$1F
                  DELAY2:
-000073 958a      	dec r24
-000074 f7f1      	brne DELAY2
-000075 95aa      	dec r26
-000076 f7d9      	brne DELAY1
-000077 9508      	ret
+000063 958a      	dec r24
+000064 f7f1      	brne DELAY2
+000065 95aa      	dec r26
+000066 f7d9      	brne DELAY1
+000067 9508      	ret
                  
                  SOUND:
-000078 e1cf      	ldi r28,$1F
-000079 9ac0      	sbi PORTB,0
-00007a e0aa      	ldi r26,10
-00007b 940e 0072 	call DELAY
-00007d 98c0      	cbi PORTB,0
-                 SOUND1:
-00007e 95ca      	dec r28
-00007f f7f1      	brne SOUND1
-000080 95ba      	dec r27
-000081 f7b1      	brne SOUND
-                 	
-000082 9508      	ret
+                 ;	ldi r28,$1F
+000068 9ac0      	sbi PORTB,0
+000069 e0aa      	ldi r26,SPEED
+00006a dff7      	rcall DELAY
+00006b 98c0      	cbi PORTB,0
+00006c e0aa      	ldi r26,SPEED
+00006d dff4      	rcall DELAY
+                 ;SOUND1:
+                 ;	dec r28
+                 ;	brne SOUND1
+00006e 95ba      	dec r27
+00006f f7c1      	brne SOUND
+000070 9508      	ret
+                 
+                 NOSOUND:
+000071 e7a8      	ldi r26,2*N
+000072 dfef      	rcall DELAY ;NOBEEP *2
+000073 e7a8      	ldi r26,2*N
+000074 dfed      	rcall DELAY ;NOBEEP *2
+000075 e7a8      	ldi r26,2*N
+000076 dfeb      	rcall DELAY ;NOBEEP *2
+000077 e7a8      	ldi r26,2*N
+000078 dfe9      	rcall DELAY ;NOBEEP *2
+000079 e7a8      	ldi r26,2*N
+00007a dfe7      	rcall DELAY ;NOBEEP *2
+00007b e7a8      	ldi r26,2*N
+00007c dfe5      	rcall DELAY ;NOBEEP *2
+00007d e7a8      	ldi r26,2*N
+00007e dfe3      	rcall DELAY ;NOBEEP *2
+00007f e7a8      	ldi r26,2*N
+000080 dfe1      	rcall DELAY ;NOBEEP *2
+000081 9508      	ret
+                 
                  
                  MESSAGE:
                  	;.org 100
-000083 4f53
-000084 0053      	.db "SOS",$00
+000082 4f53
+000083 2053
+000084 4153
+000085 4241
+\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm(209): warning: .cseg .db misalignment - padding zero byte
+000086 0000      	.db "SOS SAAB",$00
                  ASCII:
                  	;.org 100
-000085 4120
-000086 4342
-000087 4544
-000088 4746
-000089 4948
-00008a 4b4a
-00008b 4d4c
-00008c 4f4e
-00008d 5150
-00008e 5352
-00008f 5554
-000090 5756
-000091 5958
-000092 005a      	.db $20,$41,$42,$43,$44,$45,$46,$47,$48,$49,$4A,$4B,$4C,$4D,$4E,$4F,$50,$51,$52,$53,$54,$55,$56,$57,$58,$59,$5A,$00
+000087 4120
+000088 4342
+000089 4544
+00008a 4746
+00008b 4948
+00008c 4b4a
+00008d 4d4c
+00008e 4f4e
+00008f 5150
+000090 5352
+000091 5554
+000092 5756
+000093 5958
+000094 005a      	.db $20,$41,$42,$43,$44,$45,$46,$47,$48,$49,$4A,$4B,$4C,$4D,$4E,$4F,$50,$51,$52,$53,$54,$55,$56,$57,$58,$59,$5A,$00
                  
                  HEX:
                  	;.org 100
-000093 6001
-000094 a888
-000095 4090
-000096 d028
-000097 2008
-000098 b078
-000099 e048
-00009a f0a0
-00009b d868
-00009c 1050
-00009d 30c0
-00009e 7018
-00009f b898
+000095 6001
+000096 a888
+000097 4090
+000098 d028
+000099 2008
+00009a b078
+00009b e048
+00009c f0a0
+00009d d868
+00009e 1050
+00009f 30c0
+0000a0 7018
+0000a1 b898
 
 
 RESOURCE USE INFORMATION
@@ -1097,38 +1133,38 @@ counted separately from r26..r31 here.
 "ATmega16A" register use summary:
 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 r5 :   0 r6 :   0 r7 :   0 
 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 r13:   0 r14:   0 r15:   0 
-r16:   5 r17:   5 r18:   2 r19:   0 r20:   5 r21:   5 r22:   1 r23:   1 
-r24:   2 r25:   6 r26:   7 r27:   3 r28:   2 r29:   0 r30:   6 r31:   6 
+r16:   5 r17:   7 r18:   2 r19:   0 r20:   5 r21:   5 r22:   1 r23:   1 
+r24:   2 r25:   6 r26:  20 r27:   3 r28:   0 r29:   0 r30:   6 r31:   6 
 x  :   0 y  :   0 z  :   8 
-Registers used: 15 out of 35 (42.9%)
+Registers used: 14 out of 35 (40.0%)
 
 "ATmega16A" instruction use summary:
 .lds  :   0 .sts  :   0 adc   :   0 add   :   0 adiw  :   4 and   :   0 
 andi  :   0 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
-brcc  :   0 brcs  :   1 break :   0 breq  :   5 brge  :   0 brhc  :   0 
+brcc  :   1 brcs  :   1 break :   0 breq  :   4 brge  :   0 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
 brne  :   4 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
-brvs  :   0 bset  :   0 bst   :   0 call  :  17 cbi   :   2 cbr   :   0 
+brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   1 cbr   :   0 
 clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   6 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   2 cpc   :   0 
-cpi   :   3 cpse  :   0 dec   :   4 eor   :   0 fmul  :   0 fmuls :   0 
-fmulsu:   0 icall :   0 ijmp  :   0 in    :   0 inc   :   2 jmp   :   8 
-ld    :   0 ldd   :   0 ldi   :  23 lds   :   0 lpm   :   8 lsl   :   1 
+cpi   :   3 cpse  :   0 dec   :   3 eor   :   0 fmul  :   0 fmuls :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :   0 inc   :   2 jmp   :   0 
+ld    :   0 ldd   :   0 ldi   :  36 lds   :   0 lpm   :   8 lsl   :   2 
 lsr   :   0 mov   :   1 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
 neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :   3 pop   :   2 
-push  :   2 rcall :   0 ret   :  11 reti  :   0 rjmp  :   0 rol   :   0 
+push  :   2 rcall :  30 ret   :  11 reti  :   0 rjmp  :   7 rol   :   0 
 ror   :   0 sbc   :   0 sbci  :   0 sbi   :   1 sbic  :   0 sbis  :   0 
 sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
 sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
 sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   0 
 sub   :   0 subi  :   0 swap  :   0 tst   :   0 wdr   :   0 
-Instructions used: 21 out of 113 (18.6%)
+Instructions used: 22 out of 113 (19.5%)
 
 "ATmega16A" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x000142    262     60    322   16384   2.0%
+[.cseg] 0x000000 0x000146    260     66    326   16384   2.0%
 [.dseg] 0x000060 0x000060      0      0      0    1024   0.0%
 [.eseg] 0x000000 0x000000      0      0      0     512   0.0%
 
-Assembly complete, 0 errors, 0 warnings
+Assembly complete, 0 errors, 1 warnings
