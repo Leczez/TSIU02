@@ -35,9 +35,10 @@ MAIN:
 	ldi ZH,HIGH(MESSAGE*2)
 	ldi ZL,LOW(MESSAGE*2)
 NEXT:
-	rcall SEND_CHAR
-	cpi r20,$00
+	rcall GET_CHAR	
+	cpi r16,$00
 	breq MAIN;RESET_Z
+	rcall SEND_CHAR
 	rjmp NEXT
 
 
@@ -50,8 +51,8 @@ GET_CHAR:
 
 
 SEND_CHAR:
-	rcall GET_CHAR	
 	rcall BEEP_CHAR
+	;ldi r26,2*N
 	rcall NOSOUND
 	ret
 
@@ -70,17 +71,6 @@ LOOKUPDONE:
 LOOKUP:
 	push ZH
 	push ZL
-	;ldi ZH,HIGH(ASCII*2) ; kanske gånger 2
-	;ldi ZL,LOW(ASCII*2)
-/*FIND_ASCII:
-	lpm r18,Z
-	cp r16,r18
-	breq LOOKUP_BIT
-	adiw Z,1
-	inc r20
-	rjmp FIND_ASCII
-	*/
-LOOKUP_BIT:
 	ldi ZH,HIGH(HEX*2) ; kanske gånger 2
 	ldi ZL,LOW(HEX*2)
 	subi r16,$41

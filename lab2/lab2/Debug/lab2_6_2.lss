@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm Fri Nov 29 13:51:56 2019
+AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm Fri Nov 29 14:43:24 2019
 
 [builtin](2): Including file 'C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR Assembler\Native\2.1.1175\avrassembler\Include\m16Adef.inc'
                  
@@ -905,23 +905,24 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\l
 00000c e0f0      	ldi ZH,HIGH(MESSAGE*2)
 00000d ede4      	ldi ZL,LOW(MESSAGE*2)
                  NEXT:
-00000e d006      	rcall SEND_CHAR
-00000f 3040      	cpi r20,$00
+00000e d004      	rcall GET_CHAR	
+00000f 3000      	cpi r16,$00
 000010 f3d9      	breq MAIN;RESET_Z
-000011 cffc      	rjmp NEXT
+000011 d004      	rcall SEND_CHAR
+000012 cffb      	rjmp NEXT
                  
                  
                  ; Hämtar en character från programminnet
                  GET_CHAR:
-000012 9105      	lpm r16,Z+
-000013 2f40      	mov r20,r16
-000014 9508      	ret
+000013 9105      	lpm r16,Z+
+000014 2f40      	mov r20,r16
+000015 9508      	ret
                  
                  
                  
                  SEND_CHAR:
-000015 dffc      	rcall GET_CHAR	
 000016 d002      	rcall BEEP_CHAR
+                 	;ldi r26,2*N
 000017 d045      	rcall NOSOUND
 000018 9508      	ret
                  
@@ -940,17 +941,6 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\l
                  LOOKUP:
 000022 93ff      	push ZH
 000023 93ef      	push ZL
-                 	;ldi ZH,HIGH(ASCII*2) ; kanske gånger 2
-                 	;ldi ZL,LOW(ASCII*2)
-                 /*FIND_ASCII:
-                 	lpm r18,Z
-                 	cp r16,r18
-                 	breq LOOKUP_BIT
-                 	adiw Z,1
-                 	inc r20
-                 	rjmp FIND_ASCII
-                 	*/
-                 LOOKUP_BIT:
 000024 e0f0      	ldi ZH,HIGH(HEX*2) ; kanske gånger 2
 000025 edee      	ldi ZL,LOW(HEX*2)
 000026 5401      	subi r16,$41
@@ -1063,7 +1053,7 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\l
 00006b 2053
 00006c 4153
 00006d 4241
-\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm(192): warning: .cseg .db misalignment - padding zero byte
+\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm(182): warning: .cseg .db misalignment - padding zero byte
 00006e 0000      	.db "SOS SAAB",$00
                  ;ASCII:
                  	;.org 100
@@ -1084,7 +1074,7 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\l
 000079 1830
 00007a 9870
 00007b c8b8
-\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm(199): warning: .cseg .db misalignment - padding zero byte
+\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm(189): warning: .cseg .db misalignment - padding zero byte
 
 
 RESOURCE USE INFORMATION
@@ -1104,7 +1094,7 @@ counted separately from r26..r31 here.
 "ATmega16A" register use summary:
 r0 :   0 r1 :   0 r2 :   0 r3 :   2 r4 :   0 r5 :   0 r6 :   0 r7 :   0 
 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 r13:   0 r14:   0 r15:   0 
-r16:   8 r17:   7 r18:   0 r19:   0 r20:   2 r21:   0 r22:   0 r23:   1 
+r16:   9 r17:   7 r18:   0 r19:   0 r20:   1 r21:   0 r22:   0 r23:   1 
 r24:   2 r25:   5 r26:  10 r27:   3 r28:   0 r29:   0 r30:   6 r31:   6 
 x  :   0 y  :   0 z  :   3 
 Registers used: 12 out of 35 (34.3%)
