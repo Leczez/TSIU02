@@ -6,7 +6,8 @@
  *   Author: lincl896
  */ 
 
- .equ N = 70
+ .equ NHIGH = 0
+ .equ NLOW = 70
  .equ BEEPTIME = 40
  .equ SPEED = 10
 
@@ -24,9 +25,8 @@ SETUP:
 
 	ldi r16,$ff
 	out DDRB,r16
-
-	clr r17 ; BEEP BINARY
-	clr r23 ; BEEP OUTPUT
+	clr r25; För DELAYEN
+	clr r24; För DELAYEN
 	clr r3
 	adiw Z,$00 ;pekare
 
@@ -35,43 +35,36 @@ MAIN:
 	ldi ZH,HIGH(MESSAGE*2)
 	ldi ZL,LOW(MESSAGE*2)
 NEXT:
-	rcall GET_CHAR	
+	lpm r16,Z+
+	mov r20,r16	
 	cpi r16,$00
 	breq MAIN;RESET_Z
 	rcall SEND_CHAR
 	rjmp NEXT
 
-
-; Hämtar en character från programminnet
-GET_CHAR:
-	lpm r16,Z+
-	mov r20,r16
-	ret
-
-
-
 SEND_CHAR:
+	cpi r16,$20
+	breq BLANKSPACE
+	rcall LOOKUP
 	rcall BEEP_CHAR
-	;ldi r26,2*N
 	rcall NOSOUND
+DONE:
 	ret
 
-BEEP_CHAR:
-	cpi r16,$20
-	breq LOOKUPDONE
-	rcall LOOKUP
-LOOKUPDONE:
-	rcall SEND
-	ldi r26,2*N
+BLANKSPACE:
+	ldi r24,NLOW*2
+	ldi r25,NHIGH
 	rcall DELAY ;NOBEEP *2
-	rcall DELAY ;NOBEEP *2
-	rcall DELAY ;NOBEEP *2
-	ret
+	;rcall DELAY ;NOBEEP *2
+	;ldi r26,N
+	;rcall DELAY ;NOBEEP
+	;ldi r26,N
+	rjmp DONE
 
 LOOKUP:
 	push ZH
 	push ZL
-	ldi ZH,HIGH(HEX*2) ; kanske gånger 2
+	ldi ZH,HIGH(HEX*2)
 	ldi ZL,LOW(HEX*2)
 	subi r16,$41
 	add ZL,r16
@@ -81,14 +74,16 @@ LOOKUP:
 	pop ZH
 	ret
 
-SEND:
-	mov r25,r17
-	;rcall GET_BIT
-	rcall SEND_BITS
+BEEP_CHAR:
+	rcall SEND
+	ldi r24,NLOW*2
+	ldi r25,NHIGH
+	rcall DELAY ;NOBEEP *2
 	ret
 
-GET_BIT:
-	lsl r17
+SEND:
+	mov r29,r17
+	rcall SEND_BITS
 	ret
 
 SEND_BITS:
@@ -96,94 +91,64 @@ SEND_BITS:
 	ret
 
 BIT:
+	lsl r17
+	breq BITDONE
 	rcall BEEP
 	rcall NOSOUND
-	;rcall GET_BIT
-	cpi r17,$80
-	brne BIT
+	rjmp BIT
+BITDONE:
 	ret
 
 BEEP:
-	cpi r16,$20
-	breq BLANKSPACE
-	lsl r17
 	brcs LONG_BEEP
 SHORT_BEEP:
 	ldi r27,BEEPTIME
 	rjmp DOBEEP
 LONG_BEEP:
 	ldi r27,3*BEEPTIME
-	rjmp DOBEEP
-BLANKSPACE:
-	ldi r26,2*N
-	rcall DELAY ;NOBEEP *2
-	rcall DELAY ;NOBEEP *2
-	ldi r26,N
-	rcall DELAY ;NOBEEP
-	ldi r17,$80
-	ldi r26,N
-	rjmp BEEPAT
 DOBEEP:
 	rcall SOUND
-	ldi r26,N
-BEEPAT:
+	ldi r24,NLOW*2
+	ldi r25,NHIGH
 	rcall DELAY
 	ret
-
-
-
-
 
 DELAY:
-	;ldi r23,$0A
-DELAY1:
-	ldi r24,$1F
-DELAY2:
-	dec r24
-	brne DELAY2
-	dec r26
-	brne DELAY1
-	ldi r26,2*N
+	sbiw r24,1
+	brne DELAY
 	ret
 
+/*DELAY:
+	ldi r24,$1F
+DELAY1:
+	dec r24
+	brne DELAY1
+	dec r26
+	brne DELAY
+	ldi r26,2*N
+	ret
+*/
 SOUND:
-;	ldi r28,$1F
 	sbi PORTB,0
-	ldi r26,SPEED
+	ldi r24,SPEED
 	rcall DELAY
 	cbi PORTB,0
-	ldi r26,SPEED
+	ldi r24,SPEED
 	rcall DELAY
-;SOUND1:
-;	dec r28
-;	brne SOUND1
 	dec r27
 	brne SOUND
 	ret
 
 NOSOUND:
-	ldi r26,2*N
+	ldi r24,NLOW*2
+	ldi r25,NHIGH*3
 	rcall DELAY ;NOBEEP *2
-	rcall DELAY ;NOBEEP *2
-	rcall DELAY ;NOBEEP *2
-	rcall DELAY ;NOBEEP *2
-	rcall DELAY ;NOBEEP *2
-	rcall DELAY ;NOBEEP *2
-	rcall DELAY ;NOBEEP *2
-	rcall DELAY ;NOBEEP *2
-	rcall DELAY ;NOBEEP *2
-	rcall DELAY
-	rcall DELAY
 	ret
 
 
 MESSAGE:
 	;.org 100
 	.db "SOS SAAB",$00
-;ASCII:
-	;.org 100
-	;.db $20,$41,$42,$43,$44,$45,$46,$47,$48,$49,$4A,$4B,$4C,$4D,$4E,$4F,$50,$51,$52,$53,$54,$55,$56,$57,$58,$59,$5A,$00
-
 HEX:
 	;.org $200
 	.db $60,$88,$A8,$90,$40,$28,$D0,$08,$20,$78,$B0,$48,$E0,$A0,$F0,$68,$D8,$50,$10,$C0,$30,$18,$70,$98,$B8,$C8,$00

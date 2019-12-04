@@ -22,32 +22,26 @@
   <FILE>lab2.lss</FILE>
  </OUTPUT_FILES>
  <LABELS>
-  <SETUP><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>9</LINE></SETUP>
-  <MESSAGE><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>158</LINE></MESSAGE>
-  <MAIN><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>30</LINE></MAIN>
-  <GET_CHAR><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>38</LINE></GET_CHAR>
-  <SEND_CHAR><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>50</LINE></SEND_CHAR>
-  <RESET_Z><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>45</LINE></RESET_Z>
-  <BEEP_CHAR><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>56</LINE></BEEP_CHAR>
-  <LOOKUP><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>62</LINE></LOOKUP>
-  <SEND><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>93</LINE></SEND>
-  <ASCII><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>161</LINE></ASCII>
-  <FIND_ASCII><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>67</LINE></FIND_ASCII>
-  <LOOKUP_BIT><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>75</LINE></LOOKUP_BIT>
-  <HEX><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>165</LINE></HEX>
-  <FIND_BIT><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>79</LINE></FIND_BIT>
-  <RETURN><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>87</LINE></RETURN>
-  <GET_BIT><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>99</LINE></GET_BIT>
-  <SEND_BITS><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>103</LINE></SEND_BITS>
-  <BIT><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>107</LINE></BIT>
-  <BEEP><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>117</LINE></BEEP>
-  <NOBEEP><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>141</LINE></NOBEEP>
-  <RETURN_BIT><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>114</LINE></RETURN_BIT>
-  <BLANKSPACE><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>136</LINE></BLANKSPACE>
-  <LONG_BEEP><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>123</LINE></LONG_BEEP>
-  <SHORT_BEEP><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>129</LINE></SHORT_BEEP>
-  <DELAY><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>147</LINE></DELAY>
-  <DELAY1><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>149</LINE></DELAY1>
-  <DELAY2><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>151</LINE></DELAY2>
+  <SETUP><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>15</LINE></SETUP>
+  <MESSAGE><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>150</LINE></MESSAGE>
+  <MAIN><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>34</LINE></MAIN>
+  <NEXT><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>37</LINE></NEXT>
+  <SEND_CHAR><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>45</LINE></SEND_CHAR>
+  <BLANKSPACE><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>54</LINE></BLANKSPACE>
+  <LOOKUP><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>64</LINE></LOOKUP>
+  <BEEP_CHAR><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>77</LINE></BEEP_CHAR>
+  <NOSOUND><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>143</LINE></NOSOUND>
+  <DONE><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>51</LINE></DONE>
+  <DELAY><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>117</LINE></DELAY>
+  <HEX><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>153</LINE></HEX>
+  <SEND><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>84</LINE></SEND>
+  <SEND_BITS><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>89</LINE></SEND_BITS>
+  <BIT><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>93</LINE></BIT>
+  <BITDONE><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>100</LINE></BITDONE>
+  <BEEP><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>103</LINE></BEEP>
+  <LONG_BEEP><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>108</LINE></LONG_BEEP>
+  <SHORT_BEEP><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>105</LINE></SHORT_BEEP>
+  <DOBEEP><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>110</LINE></DOBEEP>
+  <SOUND><FILE>C:\Users\Linus\github\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>132</LINE></SOUND>
  </LABELS>
 </ASSEMBLER_INFO>
