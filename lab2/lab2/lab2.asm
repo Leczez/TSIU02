@@ -6,10 +6,10 @@
  *   Author: lincl896
  */ 
 
- .equ NHIGH = 0
- .equ NLOW = 70
- .equ BEEPTIME = 40
- .equ SPEED = 10
+ .equ NHIGH = 70
+ .equ NLOW = 0
+ .equ BEEPTIME = 70
+ .equ SPEED = 120
 
 
 SETUP:
@@ -53,7 +53,7 @@ DONE:
 
 BLANKSPACE:
 	ldi r24,NLOW*2
-	ldi r25,NHIGH
+	ldi r25,NHIGH * 2
 	rcall DELAY ;NOBEEP *2
 	;rcall DELAY ;NOBEEP *2
 	;ldi r26,N
