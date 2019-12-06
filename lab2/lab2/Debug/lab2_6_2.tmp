@@ -22,25 +22,25 @@
  </OUTPUT_FILES>
  <LABELS>
   <SETUP><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>15</LINE></SETUP>
-  <MESSAGE><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>133</LINE></MESSAGE>
+  <MESSAGE><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>131</LINE></MESSAGE>
   <MAIN><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>32</LINE></MAIN>
   <NEXT><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>35</LINE></NEXT>
-  <SEND_CHAR><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>46</LINE></SEND_CHAR>
-  <BLANKSPACE><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>54</LINE></BLANKSPACE>
-  <LOOKUP><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>62</LINE></LOOKUP>
-  <BEEP_CHAR><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>75</LINE></BEEP_CHAR>
-  <NOSOUND><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>117</LINE></NOSOUND>
-  <DONE><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>59</LINE></DONE>
-  <HEX><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>136</LINE></HEX>
-  <SEND><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>81</LINE></SEND>
-  <BIT><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>86</LINE></BIT>
-  <BITDONE><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>93</LINE></BITDONE>
-  <BEEP><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>96</LINE></BEEP>
-  <LONG_BEEP><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>101</LINE></LONG_BEEP>
-  <SHORT_BEEP><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>98</LINE></SHORT_BEEP>
-  <DOBEEP><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>103</LINE></DOBEEP>
-  <SOUND><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>111</LINE></SOUND>
-  <DELAY><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>107</LINE></DELAY>
-  <CLEAR><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>123</LINE></CLEAR>
+  <SEND_CHAR><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>44</LINE></SEND_CHAR>
+  <BLANKSPACE><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>52</LINE></BLANKSPACE>
+  <LOOKUP><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>60</LINE></LOOKUP>
+  <BEEP_CHAR><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>73</LINE></BEEP_CHAR>
+  <NOSOUND><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>115</LINE></NOSOUND>
+  <DONE><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>57</LINE></DONE>
+  <HEX><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>134</LINE></HEX>
+  <SEND><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>79</LINE></SEND>
+  <BIT><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>84</LINE></BIT>
+  <BITDONE><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>91</LINE></BITDONE>
+  <BEEP><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>94</LINE></BEEP>
+  <LONG_BEEP><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>99</LINE></LONG_BEEP>
+  <SHORT_BEEP><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>96</LINE></SHORT_BEEP>
+  <DOBEEP><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>101</LINE></DOBEEP>
+  <SOUND><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>109</LINE></SOUND>
+  <DELAY><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>105</LINE></DELAY>
+  <CLEAR><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm</FILE><LINE>121</LINE></CLEAR>
  </LABELS>
 </ASSEMBLER_INFO>
