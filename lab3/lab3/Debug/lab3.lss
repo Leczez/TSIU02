@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm Fri Dec 06 11:15:23 2019
+AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm Tue Dec 10 16:39:06 2019
 
 [builtin](2): Including file 'C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR Assembler\Native\2.1.1175\avrassembler\Include\m16Adef.inc'
                  
@@ -873,57 +873,73 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\l
                   *
                   *  Created: 2019-12-06 10:40:34
                   *   Author: lincl896
-                  */ 
+                  */ .org $0000
+000000 940c 0006 	jmp SETUP
                  
+                 	.org $0002
+000002 940c 001f  	jmp INTERRUPT0
                  
-                  SETUP:
+                 	.org $0004
+000004 940c 0018 	jmp INTERRUPT1
                  
-000000 e004      	ldi r16,HIGH(RAMEND)
-000001 bf0e      	out SPH,r16
-000002 e50f      	ldi r16,LOW(RAMEND)
-000003 bf0d      	out SPL,r16
+                 	.equ CNT = $60
                  
-000004 ef0f      	ldi r16,$FF
-000005 bb07      	out DDRB,r16
-000006 e007      	ldi r16,$07
-000007 bb0a      	out DDRA,r16
+                 SETUP:
                  
+000006 e004      	ldi r16,HIGH(RAMEND)
+000007 bf0e      	out SPH,r16
+000008 e50f      	ldi r16,LOW(RAMEND)
+000009 bf0d      	out SPL,r16
                  
+00000a ef0f      	ldi r16,$FF
+00000b bb07      	out DDRB,r16
+00000c ef0f      	ldi r16,$FF
+00000d bb0a      	out DDRA,r16
                  
-000008 9478      	sei
-                 
-                 MAIN:
+00000e e00f      	ldi r16,(1<<ISC01)|(1<<ISC00)|(1<<ISC11)|(1<<ISC10)
+00000f bf05      	out MCUCR, r16
                  	
+000010 ec00      	ldi r16,(1<<INT0)|(1<<INT1)
+000011 bf0b      	out GICR,r16
                  
-000009 cfff      	rjmp MAIN
+000012 ef1f      	ldi r17, $FF
+000013 9310 0060 	sts CNT, r17
+                 MAIN:
+000015 9478      	sei
+000016 9588      	sleep
+000017 cffd      	rjmp MAIN
                  
                  
-                  MUX:
+                 /* MUX:
                  
-00000a 9508      	ret ; kanske reti
-                 
+                 	ret ; kanske reti
+                 */
                  
                  INTERRUPT1:
-00000b d005      	rcall SAVE_STATUS_REGISTER
-                 
-00000c d007      	rcall RESTORE_STATUS_REGISTER
-00000d 9518      	reti
+000018 94f8      	cli
+000019 d00c      	rcall SAVE_STATUS_REGISTER
+00001a 9110 0060 	lds r17,CNT
+00001c bb18      	out PORTB,r17
+00001d d00b      	rcall RESTORE_STATUS_REGISTER
+00001e 9518      	reti
                  
                  
                  INTERRUPT0:
-00000e d002      	rcall SAVE_STATUS_REGISTER
-                 
-00000f d004      	rcall RESTORE_STATUS_REGISTER
-000010 9518      	reti
+00001f 94f8      	cli
+000020 d005      	rcall SAVE_STATUS_REGISTER
+000021 9110 0060 	lds r17,CNT
+000023 bb18      	out PORTB,r17
+000024 d004      	rcall RESTORE_STATUS_REGISTER
+000025 9518      	reti
                  
                  SAVE_STATUS_REGISTER:
-000011 930f      	push r16
-000012 b70f      	in r16,SREG
-000013 9508      	ret
+000026 930f      	push r16
+000027 b70f      	in r16,SREG
+000028 9508      	ret
                  
                  RESTORE_STATUS_REGISTER:
-000014 bf0f      	out SREG,r16
-000015 910f      	pop r16
+000029 bf0f      	out SREG,r16
+00002a 910f      	pop r16
 
 
 RESOURCE USE INFORMATION
@@ -943,10 +959,10 @@ counted separately from r26..r31 here.
 "ATmega16A" register use summary:
 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 r5 :   0 r6 :   0 r7 :   0 
 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 r13:   0 r14:   0 r15:   0 
-r16:  12 r17:   0 r18:   0 r19:   0 r20:   0 r21:   0 r22:   0 r23:   0 
+r16:  16 r17:   6 r18:   0 r19:   0 r20:   0 r21:   0 r22:   0 r23:   0 
 r24:   0 r25:   0 r26:   0 r27:   0 r28:   0 r29:   0 r30:   0 r31:   0 
 x  :   0 y  :   0 z  :   0 
-Registers used: 1 out of 35 (2.9%)
+Registers used: 2 out of 35 (5.7%)
 
 "ATmega16A" instruction use summary:
 .lds  :   0 .sts  :   0 adc   :   0 add   :   0 adiw  :   0 and   :   0 
@@ -955,25 +971,25 @@ brcc  :   0 brcs  :   0 break :   0 breq  :   0 brge  :   0 brhc  :   0
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
 brne  :   0 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
 brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   0 cbr   :   0 
-clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   0 cls   :   0 
+clc   :   0 clh   :   0 cli   :   2 cln   :   0 clr   :   0 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
 cpi   :   0 cpse  :   0 dec   :   0 eor   :   0 fmul  :   0 fmuls :   0 
-fmulsu:   0 icall :   0 ijmp  :   0 in    :   1 inc   :   0 jmp   :   0 
-ld    :   0 ldd   :   0 ldi   :   4 lds   :   0 lpm   :   0 lsl   :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :   1 inc   :   0 jmp   :   3 
+ld    :   0 ldd   :   0 ldi   :   7 lds   :   2 lpm   :   0 lsl   :   0 
 lsr   :   0 mov   :   0 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
-neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :   5 pop   :   1 
-push  :   1 rcall :   4 ret   :   3 reti  :   2 rjmp  :   1 rol   :   0 
+neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :   9 pop   :   1 
+push  :   1 rcall :   4 ret   :   2 reti  :   2 rjmp  :   1 rol   :   0 
 ror   :   0 sbc   :   0 sbci  :   0 sbi   :   0 sbic  :   0 sbis  :   0 
 sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
 sei   :   1 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
-sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   0 
+sez   :   0 sleep :   1 spm   :   0 st    :   0 std   :   0 sts   :   1 
 sub   :   0 subi  :   0 swap  :   0 tst   :   0 wdr   :   0 
-Instructions used: 10 out of 113 (8.8%)
+Instructions used: 15 out of 113 (13.3%)
 
 "ATmega16A" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x00002e     46      0     46   16384   0.3%
+[.cseg] 0x000000 0x000058     88      0     88   16384   0.5%
 [.dseg] 0x000060 0x000060      0      0      0    1024   0.0%
 [.eseg] 0x000000 0x000000      0      0      0     512   0.0%
 
