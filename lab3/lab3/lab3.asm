@@ -3,16 +3,17 @@
  *
  *  Created: 2019-12-06 10:40:34
  *   Author: lincl896
- */ .org $0000
-	jmp SETUP
-
-	.org $0002
- 	jmp INTERRUPT0
-
-	.org $0004
-	jmp INTERRUPT1
-
-	.equ CNT = $60
+ */ 
+.org $0000
+	rjmp SETUP
+.org INT0addr
+	rjmp INTERRUPT0
+.org INT1addr
+	rjmp INTERRUPT1
+.equ LSEC = $100
+.equ HSEC = $101
+.equ LMIN = $102
+.equ HMIN = $103
 
 SETUP:
 
@@ -32,42 +33,127 @@ SETUP:
 	ldi r16,(1<<INT0)|(1<<INT1)
 	out GICR,r16
 
-	ldi r17, $FF
-	sts CNT, r17
-MAIN:
+	clr r3
+	clr r17
+	clr r19
+
+	sts LSEC,r17
+	sts HSEC,r17
+	sts LMIN,r17
+	sts HMIN,r17
+
+	rcall LOAD_Y
+
 	sei
-	sleep
+
+MAIN:
 	rjmp MAIN
 
 
-/* MUX:
+LOAD_Y:	
+	ldi YL,LOW(LSEC)
+	ldi YH,HIGH(LSEC)
+	ret
 
-	ret ; kanske reti
-*/
+CHECK_10:
+	ld r17,Y
+	ldi r18,10
+	rcall INC_TIME
+	ret
+CHECK_6:
+	ld r17,Y
+	ldi r18,6
+	rcall INC_TIME
+	ret
+
+INC_TIME:
+	cp r17,r18
+	breq DO
+	st Y+,r17
+	rjmp DID
+DO:
+	ldi r17,$00
+	st Y+,r17
+	ld r17,Y
+	inc r17
+	st Y,r17
+DID:
+	ret
 
 INTERRUPT1:
-	cli
-	rcall SAVE_STATUS_REGISTER
-	lds r17,CNT
-	out PORTB,r17
-	rcall RESTORE_STATUS_REGISTER
+	;cli
+	push r16
+	push r20
+	in r20,SREG
+	push YL
+	push YH
+	rcall LOAD_Y
+	
+	ld r17,Y
+	inc r17
+	st Y,r17
+		
+	rcall CHECK_10
+	rcall CHECK_6
+	rcall CHECK_10
+
+	ld r17,Y
+	cpi r17,6
+	breq RESET
+	rjmp DONE
+RESET:
+	ldi r17,0
+	sts LSEC,r17
+	sts HSEC,r17
+	sts LMIN,r17
+	sts HMIN,r17
+DONE:
+	pop YH
+	pop YL
+	out SREG,r20
+	pop r20
+	pop r16
 	reti
+
 
 
 INTERRUPT0:
-	cli
-	rcall SAVE_STATUS_REGISTER
-	lds r17,CNT
-	out PORTB,r17
-	rcall RESTORE_STATUS_REGISTER
+	push r16
+	push r20
+	in r20,SREG
+
+	ld r17,Y+
+	rcall OUTPUT
+	inc r19
+	cpi r19,4
+	breq RESET_Y
+	jmp EXIT
+RESET_Y:
+	rcall LOAD_Y
+	clr r19
+EXIT:
+	out SREG,r20
+	pop r20
+	pop r16
 	reti
 
-SAVE_STATUS_REGISTER:
-	push r16
-	in r16,SREG
+LOOKUP:
+	ldi ZL,LOW(TIME*2)
+	ldi ZH,HIGH(TIME*2)
+
+	add ZL,r17
+	adc ZH,r3
+
+	lpm r16,Z
+	ret
+	
+OUTPUT:
+	rcall LOOKUP
+	out PORTA,r19
+	out PORTB,r16
 	ret
 
-RESTORE_STATUS_REGISTER:
-	out SREG,r16
-	pop r16
-	ret
+
+
+TIME:
+	.db $3F,$06,$5B,$4F,$66,$6D,$7D,$07,$7F,$6F

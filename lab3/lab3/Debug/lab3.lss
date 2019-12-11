@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm Tue Dec 10 16:39:06 2019
+AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm Wed Dec 11 18:55:56 2019
 
 [builtin](2): Including file 'C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR Assembler\Native\2.1.1175\avrassembler\Include\m16Adef.inc'
                  
@@ -873,73 +873,163 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\l
                   *
                   *  Created: 2019-12-06 10:40:34
                   *   Author: lincl896
-                  */ .org $0000
-000000 940c 0006 	jmp SETUP
-                 
-                 	.org $0002
-000002 940c 001f  	jmp INTERRUPT0
-                 
-                 	.org $0004
-000004 940c 0018 	jmp INTERRUPT1
-                 
-                 	.equ CNT = $60
+                  */ 
+                 .org $0000
+000000 c004      	rjmp SETUP
+                 .org INT0addr
+000002 c050      	rjmp INTERRUPT0
+                 .org INT1addr
+000004 c02f      	rjmp INTERRUPT1
+                 .equ LSEC = $100
+                 .equ HSEC = $101
+                 .equ LMIN = $102
+                 .equ HMIN = $103
                  
                  SETUP:
                  
-000006 e004      	ldi r16,HIGH(RAMEND)
-000007 bf0e      	out SPH,r16
-000008 e50f      	ldi r16,LOW(RAMEND)
-000009 bf0d      	out SPL,r16
+000005 e004      	ldi r16,HIGH(RAMEND)
+000006 bf0e      	out SPH,r16
+000007 e50f      	ldi r16,LOW(RAMEND)
+000008 bf0d      	out SPL,r16
                  
-00000a ef0f      	ldi r16,$FF
-00000b bb07      	out DDRB,r16
-00000c ef0f      	ldi r16,$FF
-00000d bb0a      	out DDRA,r16
+000009 ef0f      	ldi r16,$FF
+00000a bb07      	out DDRB,r16
+00000b ef0f      	ldi r16,$FF
+00000c bb0a      	out DDRA,r16
                  
-00000e e00f      	ldi r16,(1<<ISC01)|(1<<ISC00)|(1<<ISC11)|(1<<ISC10)
-00000f bf05      	out MCUCR, r16
+00000d e00f      	ldi r16,(1<<ISC01)|(1<<ISC00)|(1<<ISC11)|(1<<ISC10)
+00000e bf05      	out MCUCR, r16
                  	
-000010 ec00      	ldi r16,(1<<INT0)|(1<<INT1)
-000011 bf0b      	out GICR,r16
+00000f ec00      	ldi r16,(1<<INT0)|(1<<INT1)
+000010 bf0b      	out GICR,r16
                  
-000012 ef1f      	ldi r17, $FF
-000013 9310 0060 	sts CNT, r17
+000011 2433      	clr r3
+000012 2711      	clr r17
+000013 2733      	clr r19
+                 
+000014 9310 0100 	sts LSEC,r17
+000016 9310 0101 	sts HSEC,r17
+000018 9310 0102 	sts LMIN,r17
+00001a 9310 0103 	sts HMIN,r17
+                 
+00001c d002      	rcall LOAD_Y
+                 
+00001d 9478      	sei
+                 
                  MAIN:
-000015 9478      	sei
-000016 9588      	sleep
-000017 cffd      	rjmp MAIN
+00001e cfff      	rjmp MAIN
                  
                  
-                 /* MUX:
+                 LOAD_Y:	
+00001f e0c0      	ldi YL,LOW(LSEC)
+000020 e0d1      	ldi YH,HIGH(LSEC)
+000021 9508      	ret
                  
-                 	ret ; kanske reti
-                 */
+                 CHECK_10:
+000022 8118      	ld r17,Y
+000023 e02a      	ldi r18,10
+000024 d005      	rcall INC_TIME
+000025 9508      	ret
+                 CHECK_6:
+000026 8118      	ld r17,Y
+000027 e026      	ldi r18,6
+000028 d001      	rcall INC_TIME
+000029 9508      	ret
+                 
+                 INC_TIME:
+00002a 1712      	cp r17,r18
+00002b f011      	breq DO
+00002c 9319      	st Y+,r17
+00002d c005      	rjmp DID
+                 DO:
+00002e e010      	ldi r17,$00
+00002f 9319      	st Y+,r17
+000030 8118      	ld r17,Y
+000031 9513      	inc r17
+000032 8318      	st Y,r17
+                 DID:
+000033 9508      	ret
                  
                  INTERRUPT1:
-000018 94f8      	cli
-000019 d00c      	rcall SAVE_STATUS_REGISTER
-00001a 9110 0060 	lds r17,CNT
-00001c bb18      	out PORTB,r17
-00001d d00b      	rcall RESTORE_STATUS_REGISTER
-00001e 9518      	reti
+                 	;cli
+000034 930f      	push r16
+000035 934f      	push r20
+000036 b74f      	in r20,SREG
+000037 93cf      	push YL
+000038 93df      	push YH
+000039 dfe5      	rcall LOAD_Y
+                 	
+00003a 8118      	ld r17,Y
+00003b 9513      	inc r17
+00003c 8318      	st Y,r17
+                 		
+00003d dfe4      	rcall CHECK_10
+00003e dfe7      	rcall CHECK_6
+00003f dfe2      	rcall CHECK_10
+                 
+000040 8118      	ld r17,Y
+000041 3016      	cpi r17,6
+000042 f009      	breq RESET
+000043 c009      	rjmp DONE
+                 RESET:
+000044 e010      	ldi r17,0
+000045 9310 0100 	sts LSEC,r17
+000047 9310 0101 	sts HSEC,r17
+000049 9310 0102 	sts LMIN,r17
+00004b 9310 0103 	sts HMIN,r17
+                 DONE:
+00004d 91df      	pop YH
+00004e 91cf      	pop YL
+00004f bf4f      	out SREG,r20
+000050 914f      	pop r20
+000051 910f      	pop r16
+000052 9518      	reti
+                 
                  
                  
                  INTERRUPT0:
-00001f 94f8      	cli
-000020 d005      	rcall SAVE_STATUS_REGISTER
-000021 9110 0060 	lds r17,CNT
-000023 bb18      	out PORTB,r17
-000024 d004      	rcall RESTORE_STATUS_REGISTER
-000025 9518      	reti
+000053 930f      	push r16
+000054 934f      	push r20
+000055 b74f      	in r20,SREG
                  
-                 SAVE_STATUS_REGISTER:
-000026 930f      	push r16
-000027 b70f      	in r16,SREG
-000028 9508      	ret
+000056 9119      	ld r17,Y+
+000057 d011      	rcall OUTPUT
+000058 9533      	inc r19
+000059 3034      	cpi r19,4
+00005a f011      	breq RESET_Y
+00005b 940c 005f 	jmp EXIT
+                 RESET_Y:
+00005d dfc1      	rcall LOAD_Y
+00005e 2733      	clr r19
+                 EXIT:
+00005f bf4f      	out SREG,r20
+000060 914f      	pop r20
+000061 910f      	pop r16
+000062 9518      	reti
                  
-                 RESTORE_STATUS_REGISTER:
-000029 bf0f      	out SREG,r16
-00002a 910f      	pop r16
+                 LOOKUP:
+000063 edea      	ldi ZL,LOW(TIME*2)
+000064 e0f0      	ldi ZH,HIGH(TIME*2)
+                 
+000065 0fe1      	add ZL,r17
+000066 1df3      	adc ZH,r3
+                 
+000067 9104      	lpm r16,Z
+000068 9508      	ret
+                 	
+                 OUTPUT:
+000069 dff9      	rcall LOOKUP
+00006a bb3b      	out PORTA,r19
+00006b bb08      	out PORTB,r16
+00006c 9508      	ret
+                 
+                 
+                 
+                 TIME:
+00006d 063f
+00006e 4f5b
+00006f 6d66
+000070 077d
 
 
 RESOURCE USE INFORMATION
@@ -957,39 +1047,39 @@ counted separately from r26..r31 here.
 .dseg memory usage only counts static data declared with .byte
 
 "ATmega16A" register use summary:
-r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 r5 :   0 r6 :   0 r7 :   0 
+r0 :   0 r1 :   0 r2 :   0 r3 :   2 r4 :   0 r5 :   0 r6 :   0 r7 :   0 
 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 r13:   0 r14:   0 r15:   0 
-r16:  16 r17:   6 r18:   0 r19:   0 r20:   0 r21:   0 r22:   0 r23:   0 
-r24:   0 r25:   0 r26:   0 r27:   0 r28:   0 r29:   0 r30:   0 r31:   0 
-x  :   0 y  :   0 z  :   0 
-Registers used: 2 out of 35 (5.7%)
+r16:  18 r17:  26 r18:   3 r19:   5 r20:   8 r21:   0 r22:   0 r23:   0 
+r24:   0 r25:   0 r26:   0 r27:   0 r28:   3 r29:   3 r30:   2 r31:   2 
+x  :   0 y  :  10 z  :   1 
+Registers used: 12 out of 35 (34.3%)
 
 "ATmega16A" instruction use summary:
-.lds  :   0 .sts  :   0 adc   :   0 add   :   0 adiw  :   0 and   :   0 
+.lds  :   0 .sts  :   0 adc   :   1 add   :   1 adiw  :   0 and   :   0 
 andi  :   0 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
-brcc  :   0 brcs  :   0 break :   0 breq  :   0 brge  :   0 brhc  :   0 
+brcc  :   0 brcs  :   0 break :   0 breq  :   3 brge  :   0 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
 brne  :   0 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
 brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   0 cbr   :   0 
-clc   :   0 clh   :   0 cli   :   2 cln   :   0 clr   :   0 cls   :   0 
-clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
-cpi   :   0 cpse  :   0 dec   :   0 eor   :   0 fmul  :   0 fmuls :   0 
-fmulsu:   0 icall :   0 ijmp  :   0 in    :   1 inc   :   0 jmp   :   3 
-ld    :   0 ldd   :   0 ldi   :   7 lds   :   2 lpm   :   0 lsl   :   0 
+clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   4 cls   :   0 
+clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   1 cpc   :   0 
+cpi   :   2 cpse  :   0 dec   :   0 eor   :   0 fmul  :   0 fmuls :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :   2 inc   :   3 jmp   :   1 
+ld    :   6 ldd   :   0 ldi   :  14 lds   :   0 lpm   :   2 lsl   :   0 
 lsr   :   0 mov   :   0 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
-neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :   9 pop   :   1 
-push  :   1 rcall :   4 ret   :   2 reti  :   2 rjmp  :   1 rol   :   0 
+neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :  10 pop   :   6 
+push  :   6 rcall :  10 ret   :   6 reti  :   2 rjmp  :   6 rol   :   0 
 ror   :   0 sbc   :   0 sbci  :   0 sbi   :   0 sbic  :   0 sbis  :   0 
 sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
 sei   :   1 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
-sez   :   0 sleep :   1 spm   :   0 st    :   0 std   :   0 sts   :   1 
+sez   :   0 sleep :   0 spm   :   0 st    :   4 std   :   0 sts   :   8 
 sub   :   0 subi  :   0 swap  :   0 tst   :   0 wdr   :   0 
-Instructions used: 15 out of 113 (13.3%)
+Instructions used: 22 out of 113 (19.5%)
 
 "ATmega16A" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x000058     88      0     88   16384   0.5%
+[.cseg] 0x000000 0x0000e4    214     10    224   16384   1.4%
 [.dseg] 0x000060 0x000060      0      0      0    1024   0.0%
 [.eseg] 0x000000 0x000000      0      0      0     512   0.0%
 
