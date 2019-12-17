@@ -9,9 +9,10 @@
  ; --- lab4spel.asm
 
 	.equ	VMEM_SIZE     = 5		; #rows on display
-	.equ	AD_CHAN_X   = $03		; ADC0=PA0, PORTA bit 0 X-led
-	.equ	AD_CHAN_Y   = $04		; ADC1=PA1, PORTA bit 1 Y-led
-	.equ	GAME_SPEED  = 70	; inter-run delay (millisecs)
+	.equ	AD_CHAN_X   = $04		; ADC0=PA0, PORTA bit 0 X-led
+	.equ	AD_CHAN_Y   = $03		; ADC1=PA1, PORTA bit 1 Y-led
+	.equ	GAME_SPEED  = 255	; inter-run delay (millisecs)
+	.equ	GAME_SPEED2 = 30
 	.equ	PRESCALE    = 7		; AD-prescaler value
 	.equ	BEEP_PITCH  = 20	; Victory beep pitch
 	.equ	BEEP_LENGTH = 100	; Victory beep length
@@ -27,6 +28,7 @@ TPOSY:	.byte	1
 LINE:	.byte	1	; Current line	
 VMEM:	.byte	VMEM_SIZE ; Video MEMory
 SEED:	.byte	1	; Seed for Random
+;CNT:	.byte	1 ;Counter for the MUX
 
 	; ---------------------------------------
 	; --- Macros for inc/dec-rementing
@@ -59,7 +61,11 @@ START:
 	ldi r16,LOW(RAMEND)
 	out SPL,r16	
 
-	
+	clr r24
+	clr r25 ; DELAY
+	clr r3
+	;sts CNT,r3
+
 	call	HW_INIT	
 	call	WARM
 RUN:
@@ -67,7 +73,9 @@ RUN:
 	call	ERASE_VMEM
 	call	UPDATE
 
-;*** 	Vänta en stund så inte spelet går för fort 	***
+;*** 	Vänta en stund så inte spelet går för fort 	**
+	ldi r24, GAME_SPEED
+	ldi r25, GAME_SPEED2
 	rcall DELAY
 ;*** 	Avgör om träff				 	***
 
@@ -81,10 +89,10 @@ NO_HIT:
 
 
 DELAY:
-	ldi r16,GAME_SPEED
-DELAY1:
-	dec r16
-	brne DELAY1
+	;cli
+	sbiw r24,1
+	brne DELAY
+	;sei
 	ret
 
 
@@ -94,55 +102,101 @@ MUX:
 
 ;*** 	skriv rutin som handhar multiplexningen och ***
 ;*** 	utskriften till diodmatrisen. Öka SEED.		***
-	push r16
-	
-	lds r16,line
-	cpi r16,5
-	breq RESET_Y
-	cp r16, r17
-	out PORTA,r16
-	inc r16
-	rjmp DONE
-RESET_Y:
-	clr r16
-	rcall SET_Y_POINTER
-DONE:
-	sts line,r16
-	ld r16,Y+
-	out PORTB,r16
+	push r16; Y
+	push r17; X
+	push r18
+	push YL
+	push YH
+	in r18,SREG
 
+	lds r16,LINE
+	cpi r16,5
+	brne PRINT
+RESET_LINE:
+	clr r16
+PRINT:
+	add YL,r16
+	adc YH,r3
+
+	clr r17
+	out PORTB,r17
+	out PORTA,r16
+	ld r17,Y
+	out PORTB,r17
+	inc r16
+	sts LINE,r16
+/*
+	lds r16,SEED
+	inc r16
+	sts SEED,r16
+*/
+	out SREG,r18
+	pop YH
+	pop YL
+	pop r18
+	pop r17
 	pop r16
 	reti
+
+
 
 SET_Y_POINTER:
 	ldi YL,LOW(VMEM)
 	ldi YH,HIGH(VMEM)
 	ret
 
-INPUTX:
-	;ADC
-	
-	ldi r16,AD_CHAN_X
+INPUT:
+	;ADC	
 	out ADMUX,r16
-		
 	;ADC setup
 	ldi r16,(1<<ADEN)|(1<<ADSC)
 	out ADCSRA,r16
-
 	in r16,ADCH
 	ret
 
+
+INPUTX:
+	push r16
+	push r17
+	in r17,SREG
+
+	ldi r16,AD_CHAN_X
+	rcall INPUT
+	cpi r16,0
+	brne CHECK_3 
+	DECSRAM POSX
+	rjmp X_DONE
+CHECK_3:
+	cpi r16,3
+	brne X_DONE
+	INCSRAM POSX
+X_DONE:
+	out SREG,r17
+	pop r17
+	pop r16
+	ret
+
+
+
 INPUTY:
-	;ADC
+	push r16
+	push r17
+	in r17,SREG
 
 	ldi r16,AD_CHAN_Y
-	out ADMUX,r16
-	
-	;ADC setup
-	ldi r16,(1<<ADEN)|(1<<ADSC)
-	out ADCSRA,r16
-
-	in r16,ADCH
+	rcall INPUT
+	cpi r16,0
+	brne CHECK_Y_3
+	DECSRAM POSY
+	rjmp Y_DONE
+CHECK_Y_3:
+	cpi r16,3
+	brne Y_DONE
+	INCSRAM POSY
+Y_DONE:
+	out SREG,r17
+	pop r17
+	pop r16
 	ret
 	; ---------------------------------------
 	; --- JOYSTICK Sense stick and update POSX, POSY
@@ -151,19 +205,19 @@ JOYSTICK:
 
 ;*** 	skriv kod som ökar eller minskar POSX beroende 	***
 ;*** 	på insignalen från A/D-omvandlaren i X-led...	***
-	rcall INPUTX
-	sbrs r16,0
-	DECSRAM POSX
-	sbrc r16,0
-	INCSRAM POSX
-	rcall INPUTY
-	sbrs r16,0
-	DECSRAM POSY
-	sbrc r16,0
-	INCSRAM POSY
 
+
+	rcall INPUTX
 
 ;*** 	...och samma för Y-led 				***
+	rcall INPUTY
+
+/*
+	ldi r16,2
+	sts POSY,r16
+	sts POSX,r16
+*/	
+
 
 JOY_LIM:
 	call	LIMITS		; don't fall off world!
@@ -199,12 +253,14 @@ POS_OK:
 	; --- with POSX/Y, TPOSX/Y
 	; --- Uses r16, r17
 UPDATE:	
+	cli
 	clr	ZH 
 	ldi	ZL,LOW(POSX)
 	rcall 	SETPOS
 	clr	ZH
 	ldi	ZL,LOW(TPOSX)
 	call	SETPOS
+	sei
 	ret
 
 	; --- SETPOS Set bit pattern of r16 into *Z
@@ -255,25 +311,33 @@ HW_INIT:
 	ldi r16,$07
 	out DDRA,r16
 
-	rcall SET_Y_POINTER
-
-	sei			; display on
+	;sei			; display on
 	ret
 
 	; ---------------------------------------
 	; --- WARM start. Set up a new game
 WARM:
-
+	cli
+	rcall SET_Y_POINTER
+	call	ERASE_VMEM
 ;*** 	Sätt startposition (POSX,POSY)=(0,2)		***
+	
+	sts LINE,r3
+
 	rcall RESET_POS
 
-	;push	r0		
-	;push	r0		
+/*
+	push	r0		
+	push	r0		
 	call	RANDOM		; RANDOM returns x,y on stack
 
+	pop r0
+	pop r0
+*/
 ;*** 	Sätt startposition (TPOSX,POSY)				***
 
-	call	ERASE_VMEM
+
+	sei
 	ret
 
 	; ---------------------------------------
@@ -308,15 +372,17 @@ RESET_POS:
 	rcall SET_Y_POINTER
 	
 	clr r16
-	sts POSX,r16
+	;sts POSX,r16
 	st Y+,r16
 	ldi r16,(1<<0)
-	sts POSY,r16
+	;sts POSY,r16
 	st Y,r16
 
 	pop YL
 	pop YH
 	ret
+
+
 
 	; ---------------------------------------
 	; --- Erase Videomemory bytes
@@ -325,10 +391,11 @@ RESET_POS:
 ERASE_VMEM:
 
 ;*** 	Radera videominnet						***
+	cli
 	push YL
 	push YH
 	
-	call SET_Y_POINTER
+	rcall SET_Y_POINTER
 	clr r16
 	clr r17
 CLEAR_VM:
@@ -340,6 +407,7 @@ CLEAR_VM:
 EXIT:
 	pop YH
 	pop YL
+	sei
 
 	ret
 
