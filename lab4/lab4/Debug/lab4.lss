@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab4\lab4\lab4.asm Tue Dec 17 16:08:40 2019
+AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab4\lab4\lab4.asm Wed Dec 18 17:23:02 2019
 
 [builtin](2): Including file 'C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR Assembler\Native\2.1.1175\avrassembler\Include\m16Adef.inc'
                  
@@ -879,14 +879,16 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab4\l
                   ; --- lab4spel.asm
                  
                  	.equ	VMEM_SIZE     = 5		; #rows on display
-                 	.equ	AD_CHAN_X   = $04		; ADC0=PA0, PORTA bit 0 X-led
-                 	.equ	AD_CHAN_Y   = $03		; ADC1=PA1, PORTA bit 1 Y-led
+                 	.equ	AD_CHAN_X   = $03		; ADC0=PA0, PORTA bit 0 X-led
+                 	.equ	AD_CHAN_Y   = $04		; ADC1=PA1, PORTA bit 1 Y-led
                  	.equ	GAME_SPEED  = 255	; inter-run delay (millisecs)
-                 	.equ	GAME_SPEED2 = 30
+                 	.equ	GAME_SPEED2 = 80
                  	.equ	PRESCALE    = 7		; AD-prescaler value
-                 	.equ	BEEP_PITCH  = 20	; Victory beep pitch
-                 	.equ	BEEP_LENGTH = 100	; Victory beep length
-                 	
+                 	.equ	BEEP_PITCHL = 200	; Victory beep pitch
+                 	.equ	BEEP_PITCHH = 0
+                 	.equ	BEEP_LENGTHL = 100	; Victory beep length
+                 	.equ	BEEP_LENGTHH = 1
+                 
                  	; ---------------------------------------
                  	; --- Memory layout in SRAM
                  	.dseg
@@ -921,7 +923,7 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab4\l
                  	.org 	$0
 000000 940c 0004 	jmp	START
                  	.org	INT0addr
-000002 940c 001d 	jmp	MUX
+000002 940c 0037 	jmp	MUX
                  		
                  
                  
@@ -934,36 +936,53 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab4\l
 000008 2788      	clr r24
 000009 2799      	clr r25 ; DELAY
 00000a 2433      	clr r3
-                 	;sts CNT,r3
+                 	;sts SEED,r3
                  
-00000b 940e 00a7 	call	HW_INIT	
-00000d 940e 00b0 	call	WARM
+00000b 940e 00c8 	call	HW_INIT	
+00000d 940e 00d1 	call	WARM
                  RUN:
-00000f 940e 0071 	call	JOYSTICK
-000011 940e 00ca 	call	ERASE_VMEM
-000013 940e 008c 	call	UPDATE
+00000f 940e 0092 	call	JOYSTICK
+000011 94f8      	cli
+000012 940e 0105 	call	ERASE_VMEM
+000014 9478      	sei
+000015 940e 00ad 	call	UPDATE
                  
                  ;*** 	Vänta en stund så inte spelet går för fort 	**
-000015 ef8f      	ldi r24, GAME_SPEED
-000016 e19e      	ldi r25, GAME_SPEED2
-000017 d002      	rcall DELAY
+000017 ef8f      	ldi r24, GAME_SPEED
+000018 e590      	ldi r25, GAME_SPEED2
+000019 d012      	rcall DELAY
                  ;*** 	Avgör om träff				 	***
+00001a 9100 0061 	lds r16,POSY
+00001c 9110 0063 	lds r17,TPOSY
+00001e 1701      	cp r16,r17
+00001f f451      	brne NO_HIT
+                 CHECK_HIT:
+000020 9100 0060 	lds r16,POSX
+000022 9110 0062 	lds r17,TPOSX
+000024 1701      	cp r16,r17
+000025 f421      	brne	NO_HIT	
+000026 e6a4      	ldi	r26,BEEP_LENGTHL
+000027 e0b1      	ldi r27,BEEP_LENGTHH
+000028 d0e9      	rcall	BEEP
+000029 d0a7      	rcall	WARM
                  
-                 /*	brne	NO_HIT	
-                 	ldi	r16,BEEP_LENGTH
-                 	call	BEEP
-                 	call	WARM
-                 */
                  NO_HIT:
-000018 940c 000f 	jmp	RUN
+00002a 940c 000f 	jmp	RUN
                  
                  
                  DELAY:
-                 	;cli
-00001a 9701      	sbiw r24,1
-00001b f7f1      	brne DELAY
-                 	;sei
-00001c 9508      	ret
+00002c 938f      	push r24
+00002d 939f      	push r25
+00002e 930f      	push r16
+00002f b70f      	in r16,SREG
+                 LOOP:
+000030 9701      	sbiw r24,1
+000031 f7f1      	brne LOOP
+000032 bf0f      	out SREG,r16
+000033 910f      	pop r16
+000034 919f      	pop r25
+000035 918f      	pop r24
+000036 9508      	ret
                  
                  
                  	; ---------------------------------------
@@ -972,110 +991,114 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab4\l
                  
                  ;*** 	skriv rutin som handhar multiplexningen och ***
                  ;*** 	utskriften till diodmatrisen. Öka SEED.		***
-00001d 930f      	push r16; Y
-00001e 931f      	push r17; X
-00001f 932f      	push r18
-000020 93cf      	push YL
-000021 93df      	push YH
-000022 b72f      	in r18,SREG
+000037 930f      	push r16; Y
+000038 931f      	push r17; X
+000039 932f      	push r18
+00003a 93cf      	push YL
+00003b 93df      	push YH
+00003c b72f      	in r18,SREG
                  
-000023 9100 0064 	lds r16,LINE
-000025 3005      	cpi r16,5
-000026 f409      	brne PRINT
+00003d 9100 0064 	lds r16,LINE
+00003f 3005      	cpi r16,5
+000040 f409      	brne PRINT
                  RESET_LINE:
-000027 2700      	clr r16
+000041 2700      	clr r16
                  PRINT:
-000028 0fc0      	add YL,r16
-000029 1dd3      	adc YH,r3
+000042 0fc0      	add YL,r16
+000043 1dd3      	adc YH,r3
                  
-00002a 2711      	clr r17
-00002b bb18      	out PORTB,r17
-00002c bb0b      	out PORTA,r16
-00002d 8118      	ld r17,Y
-00002e bb18      	out PORTB,r17
-00002f 9503      	inc r16
-000030 9300 0064 	sts LINE,r16
-                 /*
-                 	lds r16,SEED
-                 	inc r16
-                 	sts SEED,r16
-                 */
-000032 bf2f      	out SREG,r18
-000033 91df      	pop YH
-000034 91cf      	pop YL
-000035 912f      	pop r18
-000036 911f      	pop r17
-000037 910f      	pop r16
-000038 9518      	reti
+000044 2711      	clr r17
+000045 bb18      	out PORTB,r17
+000046 bb0b      	out PORTA,r16
+000047 8118      	ld r17,Y
+000048 bb18      	out PORTB,r17
+000049 9503      	inc r16
+00004a 9300 0064 	sts LINE,r16
+                 
+00004c 9100 006a 	lds r16,SEED
+00004e 9503      	inc r16
+00004f 9300 006a 	sts SEED,r16
+                 
+000051 bf2f      	out SREG,r18
+000052 91df      	pop YH
+000053 91cf      	pop YL
+000054 912f      	pop r18
+000055 911f      	pop r17
+000056 910f      	pop r16
+000057 9518      	reti
                  
                  
                  
                  SET_Y_POINTER:
-000039 e6c5      	ldi YL,LOW(VMEM)
-00003a e0d0      	ldi YH,HIGH(VMEM)
-00003b 9508      	ret
+000058 e6c5      	ldi YL,LOW(VMEM)
+000059 e0d0      	ldi YH,HIGH(VMEM)
+00005a 9508      	ret
                  
                  INPUT:
                  	;ADC	
-00003c b907      	out ADMUX,r16
+00005b b907      	out ADMUX,r16
                  	;ADC setup
-00003d ec00      	ldi r16,(1<<ADEN)|(1<<ADSC)
-00003e b906      	out ADCSRA,r16
-00003f b105      	in r16,ADCH
-000040 9508      	ret
+00005c ec00      	ldi r16,(1<<ADEN)|(1<<ADSC)
+00005d b906      	out ADCSRA,r16
+                 WAIT:
+00005e 9936      	sbic ADCSRA,ADSC
+00005f cffe      	rjmp WAIT
+                 	
+000060 b105      	in r16,ADCH
+000061 9508      	ret
                  
                  
                  INPUTX:
-000041 930f      	push r16
-000042 931f      	push r17
-000043 b71f      	in r17,SREG
+000062 930f      	push r16
+000063 931f      	push r17
+000064 b71f      	in r17,SREG
                  
-000044 e004      	ldi r16,AD_CHAN_X
-000045 dff6      	rcall INPUT
-000046 3000      	cpi r16,0
-000047 f431      	brne CHECK_3 
-000048 9100 0060
-00004a 950a
-00004b 9300 0060 	DECSRAM POSX
-00004d c007      	rjmp X_DONE
+000065 e003      	ldi r16,AD_CHAN_X
+000066 dff4      	rcall INPUT
+000067 3000      	cpi r16,0
+000068 f431      	brne CHECK_3 
+000069 9100 0060
+00006b 950a
+00006c 9300 0060 	DECSRAM POSX
+00006e c007      	rjmp X_DONE
                  CHECK_3:
-00004e 3003      	cpi r16,3
-00004f f429      	brne X_DONE
-000050 9100 0060
-000052 9503
-000053 9300 0060 	INCSRAM POSX
+00006f 3003      	cpi r16,3
+000070 f429      	brne X_DONE
+000071 9100 0060
+000073 9503
+000074 9300 0060 	INCSRAM POSX
                  X_DONE:
-000055 bf1f      	out SREG,r17
-000056 911f      	pop r17
-000057 910f      	pop r16
-000058 9508      	ret
+000076 bf1f      	out SREG,r17
+000077 911f      	pop r17
+000078 910f      	pop r16
+000079 9508      	ret
                  
                  
                  
                  INPUTY:
-000059 930f      	push r16
-00005a 931f      	push r17
-00005b b71f      	in r17,SREG
+00007a 930f      	push r16
+00007b 931f      	push r17
+00007c b71f      	in r17,SREG
                  
-00005c e003      	ldi r16,AD_CHAN_Y
-00005d dfde      	rcall INPUT
-00005e 3000      	cpi r16,0
-00005f f431      	brne CHECK_Y_3
-000060 9100 0061
-000062 950a
-000063 9300 0061 	DECSRAM POSY
-000065 c007      	rjmp Y_DONE
+00007d e004      	ldi r16,AD_CHAN_Y
+00007e dfdc      	rcall INPUT
+00007f 3000      	cpi r16,0
+000080 f431      	brne CHECK_Y_3
+000081 9100 0061
+000083 950a
+000084 9300 0061 	DECSRAM POSY
+000086 c007      	rjmp Y_DONE
                  CHECK_Y_3:
-000066 3003      	cpi r16,3
-000067 f429      	brne Y_DONE
-000068 9100 0061
-00006a 9503
-00006b 9300 0061 	INCSRAM POSY
+000087 3003      	cpi r16,3
+000088 f429      	brne Y_DONE
+000089 9100 0061
+00008b 9503
+00008c 9300 0061 	INCSRAM POSY
                  Y_DONE:
-00006d bf1f      	out SREG,r17
-00006e 911f      	pop r17
-00006f 910f      	pop r16
-000070 9508      	ret
+00008e bf1f      	out SREG,r17
+00008f 911f      	pop r17
+000090 910f      	pop r16
+000091 9508      	ret
                  	; ---------------------------------------
                  	; --- JOYSTICK Sense stick and update POSX, POSY
                  	; --- Uses r16
@@ -1085,10 +1108,10 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab4\l
                  ;*** 	på insignalen från A/D-omvandlaren i X-led...	***
                  
                  
-000071 dfcf      	rcall INPUTX
+000092 dfcf      	rcall INPUTX
                  
                  ;*** 	...och samma för Y-led 				***
-000072 dfe6      	rcall INPUTY
+000093 dfe6      	rcall INPUTY
                  
                  /*
                  	ldi r16,2
@@ -1098,75 +1121,75 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab4\l
                  
                  
                  JOY_LIM:
-000073 940e 0076 	call	LIMITS		; don't fall off world!
-000075 9508      	ret
+000094 940e 0097 	call	LIMITS		; don't fall off world!
+000096 9508      	ret
                  
                  	; ---------------------------------------
                  	; --- LIMITS Limit POSX,POSY coordinates	
                  	; --- Uses r16,r17
                  LIMITS:
-000076 9100 0060 	lds	r16,POSX	; variable
-000078 e017      	ldi	r17,7		; upper limit+1
-000079 940e 0085 	call	POS_LIM		; actual work
-00007b 9300 0060 	sts	POSX,r16
-00007d 9100 0061 	lds	r16,POSY	; variable
-00007f e015      	ldi	r17,5		; upper limit+1
-000080 940e 0085 	call	POS_LIM		; actual work
-000082 9300 0061 	sts	POSY,r16
-000084 9508      	ret
+000097 9100 0060 	lds	r16,POSX	; variable
+000099 e017      	ldi	r17,7		; upper limit+1
+00009a 940e 00a6 	call	POS_LIM		; actual work
+00009c 9300 0060 	sts	POSX,r16
+00009e 9100 0061 	lds	r16,POSY	; variable
+0000a0 e015      	ldi	r17,5		; upper limit+1
+0000a1 940e 00a6 	call	POS_LIM		; actual work
+0000a3 9300 0061 	sts	POSY,r16
+0000a5 9508      	ret
                  
                  POS_LIM:
-000085 6000      	ori	r16,0		; negative?
-000086 f01a      	brmi	POS_LESS	; POSX neg => add 1
-000087 1701      	cp	r16,r17		; past edge
-000088 f411      	brne	POS_OK
-000089 5002      	subi	r16,2
+0000a6 6000      	ori	r16,0		; negative?
+0000a7 f01a      	brmi	POS_LESS	; POSX neg => add 1
+0000a8 1701      	cp	r16,r17		; past edge
+0000a9 f411      	brne	POS_OK
+0000aa 5002      	subi	r16,2
                  POS_LESS:
-00008a 9503      	inc	r16	
+0000ab 9503      	inc	r16	
                  POS_OK:
-00008b 9508      	ret
+0000ac 9508      	ret
                  
                  	; ---------------------------------------
                  	; --- UPDATE VMEM
                  	; --- with POSX/Y, TPOSX/Y
                  	; --- Uses r16, r17
                  UPDATE:	
-00008c 94f8      	cli
-00008d 27ff      	clr	ZH 
-00008e e6e0      	ldi	ZL,LOW(POSX)
-00008f d006      	rcall 	SETPOS
-000090 27ff      	clr	ZH
-000091 e6e2      	ldi	ZL,LOW(TPOSX)
-000092 940e 0096 	call	SETPOS
-000094 9478      	sei
-000095 9508      	ret
+0000ad 94f8      	cli
+0000ae 27ff      	clr	ZH 
+0000af e6e0      	ldi	ZL,LOW(POSX)
+0000b0 d006      	rcall 	SETPOS
+0000b1 27ff      	clr	ZH
+0000b2 e6e2      	ldi	ZL,LOW(TPOSX)
+0000b3 940e 00b7 	call	SETPOS
+0000b5 9478      	sei
+0000b6 9508      	ret
                  
                  	; --- SETPOS Set bit pattern of r16 into *Z
                  	; --- Uses r16, r17
                  	; --- 1st call Z points to POSX at entry and POSY at exit
                  	; --- 2nd call Z points to TPOSX at entry and TPOSY at exit
                  SETPOS:
-000096 9111      	ld	r17,Z+  	; r17=POSX
-000097 940e 00a0 	call	SETBIT		; r16=bitpattern for VMEM+POSY
-000099 8110      	ld	r17,Z		; r17=POSY Z to POSY
-00009a e6e5      	ldi	ZL,LOW(VMEM)
-00009b 0fe1      	add	ZL,r17		; *(VMEM+T/POSY) ZL=VMEM+0..4
-00009c 8110      	ld	r17,Z		; current line in VMEM
-00009d 2b10      	or	r17,r16		; OR on place
-00009e 8310      	st	Z,r17		; put back into VMEM
-00009f 9508      	ret
+0000b7 9111      	ld	r17,Z+  	; r17=POSX
+0000b8 940e 00c1 	call	SETBIT		; r16=bitpattern for VMEM+POSY
+0000ba 8110      	ld	r17,Z		; r17=POSY Z to POSY
+0000bb e6e5      	ldi	ZL,LOW(VMEM)
+0000bc 0fe1      	add	ZL,r17		; *(VMEM+T/POSY) ZL=VMEM+0..4
+0000bd 8110      	ld	r17,Z		; current line in VMEM
+0000be 2b10      	or	r17,r16		; OR on place
+0000bf 8310      	st	Z,r17		; put back into VMEM
+0000c0 9508      	ret
                  	
                  	; --- SETBIT Set bit r17 on r16
                  	; --- Uses r16, r17
                  SETBIT:
-0000a0 e001      	ldi	r16,$01		; bit to shift
+0000c1 e001      	ldi	r16,$01		; bit to shift
                  SETBIT_LOOP:
-0000a1 951a      	dec 	r17			
-0000a2 f01a      	brmi 	SETBIT_END	; til done
-0000a3 0f00      	lsl 	r16		; shift
-0000a4 940c 00a1 	jmp 	SETBIT_LOOP
+0000c2 951a      	dec 	r17			
+0000c3 f01a      	brmi 	SETBIT_END	; til done
+0000c4 0f00      	lsl 	r16		; shift
+0000c5 940c 00c2 	jmp 	SETBIT_LOOP
                  SETBIT_END:
-0000a6 9508      	ret
+0000c7 9508      	ret
                  
                  	; ---------------------------------------
                  	; --- Hardware init
@@ -1178,45 +1201,48 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab4\l
                  ;*** 	flanktriggat avbrott på INT0 (PD2).			***
                  	
                  	
-0000a7 e003      	ldi r16,(1<<ISC01)|(1<<ISC00)
-0000a8 bf05      	out MCUCR,r16
+0000c8 e003      	ldi r16,(1<<ISC01)|(1<<ISC00)
+0000c9 bf05      	out MCUCR,r16
                  
-0000a9 e400      	ldi r16,(1<<INT0)
-0000aa bf0b      	out GICR,r16
+0000ca e400      	ldi r16,(1<<INT0)
+0000cb bf0b      	out GICR,r16
                  
-0000ab ef0f      	ldi r16,$FF
-0000ac bb07      	out DDRB,r16
-0000ad e007      	ldi r16,$07
-0000ae bb0a      	out DDRA,r16
+0000cc ef0f      	ldi r16,$FF
+0000cd bb07      	out DDRB,r16
+0000ce e207      	ldi r16,0b00100111
+0000cf bb0a      	out DDRA,r16
                  
-                 	;sei			; display on
-0000af 9508      	ret
+0000d0 9508      	ret
                  
                  	; ---------------------------------------
                  	; --- WARM start. Set up a new game
                  WARM:
-0000b0 94f8      	cli
-0000b1 df87      	rcall SET_Y_POINTER
-0000b2 940e 00ca 	call	ERASE_VMEM
+0000d1 94f8      	cli
+0000d2 df85      	rcall SET_Y_POINTER
+0000d3 d031      	rcall	ERASE_VMEM
                  ;*** 	Sätt startposition (POSX,POSY)=(0,2)		***
                  	
-0000b4 9230 0064 	sts LINE,r3
+0000d4 9230 0064 	sts LINE,r3
                  
-0000b6 d009      	rcall RESET_POS
+                 	
+0000d6 2700      	clr r16
+0000d7 9300 0060 	sts POSX,r16
+0000d9 e001      	ldi r16,1
+0000da 9300 0061 	sts POSY,r16
                  
-                 /*
-                 	push	r0		
-                 	push	r0		
-                 	call	RANDOM		; RANDOM returns x,y on stack
+0000dc 930f      	push	r16		
+0000dd 930f      	push	r16		
+                 	
+0000de d008      	rcall	RANDOM		; RANDOM returns x,y on stack
+                 	;*** 	Sätt startposition (TPOSX,POSY)***	
+0000df 910f      	pop r16
+0000e0 9300 0062 	sts TPOSX,r16
+0000e2 910f      	pop r16
+0000e3 9300 0063 	sts TPOSY,r16
                  
-                 	pop r0
-                 	pop r0
-                 */
-                 ;*** 	Sätt startposition (TPOSX,POSY)				***
                  
-                 
-0000b7 9478      	sei
-0000b8 9508      	ret
+0000e5 9478      	sei
+0000e6 9508      	ret
                  
                  	; ---------------------------------------
                  	; --- RANDOM generate TPOSX, TPOSY
@@ -1229,38 +1255,49 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab4\l
                  	; ---	pop TPOSY
                  	; --- Uses r16
                  RANDOM:
-0000b9 b70e      	in	r16,SPH
-0000ba 2ff0      	mov	ZH,r16
-0000bb b70d      	in	r16,SPL
-0000bc 2fe0      	mov	ZL,r16
-0000bd 9100 006a 	lds	r16,SEED
-                 	
+0000e7 b70e      	in	r16,SPH
+0000e8 2ff0      	mov	ZH,r16
+0000e9 b70d      	in	r16,SPL
+0000ea 2fe0      	mov	ZL,r16
+0000eb 9100 006a 	lds	r16,SEED
                  ;*** 	Använd SEED för att beräkna TPOSX		***
-                 ;*** 	Använd SEED för att beräkna TPOSX		***
+0000ed 7007      	andi r16,7
+0000ee e012      	ldi r17,2
+                 	;ldi r18,7
+0000ef 2f20      	mov r18,r16
+0000f0 d00a      	rcall RANDOM_LOOP
+                 STORE_X:
+0000f1 9633      	adiw Z,3
+0000f2 9311      	st Z+,r17
+                 ;*** 	Använd SEED för att beräkna TPOSY		***
+0000f3 9100 006a 	lds r16,SEED
+0000f5 7007      	andi r16,7
+0000f6 2711      	clr r17
+0000f7 e025      	ldi r18,5
+0000f8 d002      	rcall RANDOM_LOOP
                  
+                 STORE_Y:
+0000f9 8310      	st Z,r17
                  ;	***		; store TPOSX	2..6
                  ;	***		; store TPOSY   0..4
-0000bf 9508      	ret
+0000fa 9508      	ret
                  
                  
+                 RANDOM_LOOP:
+0000fb 3000      	cpi r16,0
+0000fc f409      	brne DA_LOOP
+0000fd c006      	rjmp EXIT_LOOP
+                 DA_LOOP:
+0000fe 9513      	inc r17
+0000ff 1712      	cp r17,r18
+000100 f011      	breq MAX_VAL
+000101 950a      	dec r16
+000102 cff8      	rjmp RANDOM_LOOP
                  
-                 RESET_POS:
-0000c0 93df      	push YH
-0000c1 93cf      	push YL
-0000c2 df76      	rcall SET_Y_POINTER
-                 	
-0000c3 2700      	clr r16
-                 	;sts POSX,r16
-0000c4 9309      	st Y+,r16
-0000c5 e001      	ldi r16,(1<<0)
-                 	;sts POSY,r16
-0000c6 8308      	st Y,r16
-                 
-0000c7 91cf      	pop YL
-0000c8 91df      	pop YH
-0000c9 9508      	ret
-                 
-                 
+                 MAX_VAL:
+000103 951a      	dec r17
+                 EXIT_LOOP:
+000104 9508      	ret
                  
                  	; ---------------------------------------
                  	; --- Erase Videomemory bytes
@@ -1269,32 +1306,41 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab4\l
                  ERASE_VMEM:
                  
                  ;*** 	Radera videominnet						***
-0000ca 94f8      	cli
-0000cb 93cf      	push YL
-0000cc 93df      	push YH
+000105 93cf      	push YL
+000106 93df      	push YH
                  	
-0000cd df6b      	rcall SET_Y_POINTER
-0000ce 2700      	clr r16
-0000cf 2711      	clr r17
+000107 df50      	rcall SET_Y_POINTER
+000108 2700      	clr r16
+000109 2711      	clr r17
                  CLEAR_VM:
-0000d0 9309      	st Y+,r16
-0000d1 3015      	cpi r17,5
-0000d2 f011      	breq EXIT
-0000d3 9513      	inc r17
-0000d4 cffb      	rjmp CLEAR_VM
+00010a 9309      	st Y+,r16
+00010b 3014      	cpi r17,4
+00010c f011      	breq EXIT
+00010d 9513      	inc r17
+00010e cffb      	rjmp CLEAR_VM
                  EXIT:
-0000d5 91df      	pop YH
-0000d6 91cf      	pop YL
-0000d7 9478      	sei
-                 
-0000d8 9508      	ret
+                 	
+00010f 91df      	pop YH
+000110 91cf      	pop YL
+000111 9508      	ret
                  
                  	; ---------------------------------------
                  	; --- BEEP(r16) r16 half cycles of BEEP-PITCH
                  BEEP:	
                  
                  ;*** skriv kod för ett ljud som ska markera träff 	***
-                 
+000112 94f8      	cli
+000113 9add      	sbi PORTA,5
+000114 9711      	sbiw r26,1
+000115 ec88      	ldi r24,BEEP_PITCHL
+000116 e090      	ldi r25,BEEP_PITCHH
+000117 df14      	rcall DELAY
+000118 98dd      	cbi PORTA,5
+000119 ec88      	ldi r24,BEEP_PITCHL
+00011a e090      	ldi r25,BEEP_PITCHH
+00011b df10      	rcall DELAY
+00011c f7a9      	brne BEEP
+00011d 9478      	sei
 
 
 RESOURCE USE INFORMATION
@@ -1314,37 +1360,37 @@ counted separately from r26..r31 here.
 "ATmega16A" register use summary:
 r0 :   0 r1 :   0 r2 :   0 r3 :   3 r4 :   0 r5 :   0 r6 :   0 r7 :   0 
 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 r13:   0 r14:   0 r15:   0 
-r16:  69 r17:  27 r18:   4 r19:   0 r20:   0 r21:   0 r22:   0 r23:   0 
-r24:   3 r25:   2 r26:   0 r27:   0 r28:   8 r29:   8 r30:   5 r31:   3 
-x  :   0 y  :   4 z  :   4 
-Registers used: 12 out of 35 (34.3%)
+r16:  92 r17:  38 r18:   7 r19:   0 r20:   0 r21:   0 r22:   0 r23:   0 
+r24:   7 r25:   6 r26:   2 r27:   1 r28:   6 r29:   6 r30:   5 r31:   3 
+x  :   0 y  :   2 z  :   7 
+Registers used: 14 out of 35 (40.0%)
 
 "ATmega16A" instruction use summary:
-.lds  :   0 .sts  :   0 adc   :   1 add   :   2 adiw  :   0 and   :   0 
-andi  :   0 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
-brcc  :   0 brcs  :   0 break :   0 breq  :   1 brge  :   0 brhc  :   0 
+.lds  :   0 .sts  :   0 adc   :   1 add   :   2 adiw  :   1 and   :   0 
+andi  :   2 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
+brcc  :   0 brcs  :   0 break :   0 breq  :   2 brge  :   0 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   2 
-brne  :   7 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
-brvs  :   0 bset  :   0 bst   :   0 call  :  11 cbi   :   0 cbr   :   0 
-clc   :   0 clh   :   0 cli   :   3 cln   :   0 clr   :  10 cls   :   0 
-clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   1 cpc   :   0 
-cpi   :   6 cpse  :   0 dec   :   3 eor   :   0 fmul  :   0 fmuls :   0 
-fmulsu:   0 icall :   0 ijmp  :   0 in    :   6 inc   :   5 jmp   :   4 
-ld    :   4 ldd   :   0 ldi   :  20 lds   :   8 lpm   :   0 lsl   :   1 
-lsr   :   0 mov   :   2 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
-neg   :   0 nop   :   0 or    :   1 ori   :   1 out   :  14 pop   :  13 
-push  :  13 rcall :  10 ret   :  17 reti  :   1 rjmp  :   3 rol   :   0 
-ror   :   0 sbc   :   0 sbci  :   0 sbi   :   0 sbic  :   0 sbis  :   0 
-sbiw  :   1 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
-sei   :   3 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
-sez   :   0 sleep :   0 spm   :   0 st    :   4 std   :   0 sts   :   8 
+brne  :  11 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
+brvs  :   0 bset  :   0 bst   :   0 call  :  10 cbi   :   1 cbr   :   0 
+clc   :   0 clh   :   0 cli   :   4 cln   :   0 clr   :  11 cls   :   0 
+clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   4 cpc   :   0 
+cpi   :   7 cpse  :   0 dec   :   5 eor   :   0 fmul  :   0 fmuls :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :   7 inc   :   7 jmp   :   4 
+ld    :   4 ldd   :   0 ldi   :  28 lds   :  14 lpm   :   0 lsl   :   1 
+lsr   :   0 mov   :   3 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
+neg   :   0 nop   :   0 or    :   1 ori   :   1 out   :  15 pop   :  16 
+push  :  16 rcall :  16 ret   :  17 reti  :   1 rjmp  :   6 rol   :   0 
+ror   :   0 sbc   :   0 sbci  :   0 sbi   :   1 sbic  :   1 sbis  :   0 
+sbiw  :   2 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
+sei   :   4 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
+sez   :   0 sleep :   0 spm   :   0 st    :   4 std   :   0 sts   :  13 
 sub   :   0 subi  :   1 swap  :   0 tst   :   0 wdr   :   0 
-Instructions used: 33 out of 113 (29.2%)
+Instructions used: 38 out of 113 (33.6%)
 
 "ATmega16A" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x0001b4    436      0    436   16384   2.7%
+[.cseg] 0x000000 0x00023e    574      0    574   16384   3.5%
 [.dseg] 0x000060 0x00006b      0     11     11    1024   1.1%
 [.eseg] 0x000000 0x000000      0      0      0     512   0.0%
 

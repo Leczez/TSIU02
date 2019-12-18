@@ -9,14 +9,16 @@
  ; --- lab4spel.asm
 
 	.equ	VMEM_SIZE     = 5		; #rows on display
-	.equ	AD_CHAN_X   = $04		; ADC0=PA0, PORTA bit 0 X-led
-	.equ	AD_CHAN_Y   = $03		; ADC1=PA1, PORTA bit 1 Y-led
+	.equ	AD_CHAN_X   = $03		; ADC0=PA0, PORTA bit 0 X-led
+	.equ	AD_CHAN_Y   = $04		; ADC1=PA1, PORTA bit 1 Y-led
 	.equ	GAME_SPEED  = 255	; inter-run delay (millisecs)
-	.equ	GAME_SPEED2 = 30
+	.equ	GAME_SPEED2 = 80
 	.equ	PRESCALE    = 7		; AD-prescaler value
-	.equ	BEEP_PITCH  = 20	; Victory beep pitch
-	.equ	BEEP_LENGTH = 100	; Victory beep length
-	
+	.equ	BEEP_PITCHL = 200	; Victory beep pitch
+	.equ	BEEP_PITCHH = 0
+	.equ	BEEP_LENGTHL = 100	; Victory beep length
+	.equ	BEEP_LENGTHH = 1
+
 	; ---------------------------------------
 	; --- Memory layout in SRAM
 	.dseg
@@ -64,13 +66,15 @@ START:
 	clr r24
 	clr r25 ; DELAY
 	clr r3
-	;sts CNT,r3
+	;sts SEED,r3
 
 	call	HW_INIT	
 	call	WARM
 RUN:
 	call	JOYSTICK
+	cli
 	call	ERASE_VMEM
+	sei
 	call	UPDATE
 
 ;*** 	Vänta en stund så inte spelet går för fort 	**
@@ -78,21 +82,36 @@ RUN:
 	ldi r25, GAME_SPEED2
 	rcall DELAY
 ;*** 	Avgör om träff				 	***
+	lds r16,POSY
+	lds r17,TPOSY
+	cp r16,r17
+	brne NO_HIT
+CHECK_HIT:
+	lds r16,POSX
+	lds r17,TPOSX
+	cp r16,r17
+	brne	NO_HIT	
+	ldi	r26,BEEP_LENGTHL
+	ldi r27,BEEP_LENGTHH
+	rcall	BEEP
+	rcall	WARM
 
-/*	brne	NO_HIT	
-	ldi	r16,BEEP_LENGTH
-	call	BEEP
-	call	WARM
-*/
 NO_HIT:
 	jmp	RUN
 
 
 DELAY:
-	;cli
+	push r24
+	push r25
+	push r16
+	in r16,SREG
+LOOP:
 	sbiw r24,1
-	brne DELAY
-	;sei
+	brne LOOP
+	out SREG,r16
+	pop r16
+	pop r25
+	pop r24
 	ret
 
 
@@ -125,11 +144,11 @@ PRINT:
 	out PORTB,r17
 	inc r16
 	sts LINE,r16
-/*
+
 	lds r16,SEED
 	inc r16
 	sts SEED,r16
-*/
+
 	out SREG,r18
 	pop YH
 	pop YL
@@ -151,6 +170,10 @@ INPUT:
 	;ADC setup
 	ldi r16,(1<<ADEN)|(1<<ADSC)
 	out ADCSRA,r16
+WAIT:
+	sbic ADCSRA,ADSC
+	rjmp WAIT
+	
 	in r16,ADCH
 	ret
 
@@ -308,10 +331,9 @@ HW_INIT:
 
 	ldi r16,$FF
 	out DDRB,r16
-	ldi r16,$07
+	ldi r16,0b00100111
 	out DDRA,r16
 
-	;sei			; display on
 	ret
 
 	; ---------------------------------------
@@ -319,22 +341,26 @@ HW_INIT:
 WARM:
 	cli
 	rcall SET_Y_POINTER
-	call	ERASE_VMEM
+	rcall	ERASE_VMEM
 ;*** 	Sätt startposition (POSX,POSY)=(0,2)		***
 	
 	sts LINE,r3
 
-	rcall RESET_POS
+	
+	clr r16
+	sts POSX,r16
+	ldi r16,1
+	sts POSY,r16
 
-/*
-	push	r0		
-	push	r0		
-	call	RANDOM		; RANDOM returns x,y on stack
-
-	pop r0
-	pop r0
-*/
-;*** 	Sätt startposition (TPOSX,POSY)				***
+	push	r16		
+	push	r16		
+	
+	rcall	RANDOM		; RANDOM returns x,y on stack
+	;*** 	Sätt startposition (TPOSX,POSY)***	
+	pop r16
+	sts TPOSX,r16
+	pop r16
+	sts TPOSY,r16
 
 
 	sei
@@ -356,33 +382,44 @@ RANDOM:
 	in	r16,SPL
 	mov	ZL,r16
 	lds	r16,SEED
-	
 ;*** 	Använd SEED för att beräkna TPOSX		***
-;*** 	Använd SEED för att beräkna TPOSX		***
+	andi r16,7
+	ldi r17,2
+	;ldi r18,7
+	mov r18,r16
+	rcall RANDOM_LOOP
+STORE_X:
+	adiw Z,3
+	st Z+,r17
+;*** 	Använd SEED för att beräkna TPOSY		***
+	lds r16,SEED
+	andi r16,7
+	clr r17
+	ldi r18,5
+	rcall RANDOM_LOOP
 
+STORE_Y:
+	st Z,r17
 ;	***		; store TPOSX	2..6
 ;	***		; store TPOSY   0..4
 	ret
 
 
+RANDOM_LOOP:
+	cpi r16,0
+	brne DA_LOOP
+	rjmp EXIT_LOOP
+DA_LOOP:
+	inc r17
+	cp r17,r18
+	breq MAX_VAL
+	dec r16
+	rjmp RANDOM_LOOP
 
-RESET_POS:
-	push YH
-	push YL
-	rcall SET_Y_POINTER
-	
-	clr r16
-	;sts POSX,r16
-	st Y+,r16
-	ldi r16,(1<<0)
-	;sts POSY,r16
-	st Y,r16
-
-	pop YL
-	pop YH
+MAX_VAL:
+	dec r17
+EXIT_LOOP:
 	ret
-
-
 
 	; ---------------------------------------
 	; --- Erase Videomemory bytes
@@ -391,7 +428,6 @@ RESET_POS:
 ERASE_VMEM:
 
 ;*** 	Radera videominnet						***
-	cli
 	push YL
 	push YH
 	
@@ -400,15 +436,14 @@ ERASE_VMEM:
 	clr r17
 CLEAR_VM:
 	st Y+,r16
-	cpi r17,5
+	cpi r17,4
 	breq EXIT
 	inc r17
 	rjmp CLEAR_VM
 EXIT:
+	
 	pop YH
 	pop YL
-	sei
-
 	ret
 
 	; ---------------------------------------
@@ -416,5 +451,16 @@ EXIT:
 BEEP:	
 
 ;*** skriv kod för ett ljud som ska markera träff 	***
-
+	cli
+	sbi PORTA,5
+	sbiw r26,1
+	ldi r24,BEEP_PITCHL
+	ldi r25,BEEP_PITCHH
+	rcall DELAY
+	cbi PORTA,5
+	ldi r24,BEEP_PITCHL
+	ldi r25,BEEP_PITCHH
+	rcall DELAY
+	brne BEEP
+	sei
 	ret
