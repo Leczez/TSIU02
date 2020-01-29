@@ -21,6 +21,7 @@
   <FILE>lab3.lss</FILE>
  </OUTPUT_FILES>
  <LABELS>
+<<<<<<< HEAD
   <SETUP><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>22</LINE></SETUP>
   <INTERRUPT1><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>106</LINE></INTERRUPT1>
   <INTERRUPT0><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>143</LINE></INTERRUPT0>
@@ -38,5 +39,24 @@
   <EXIT><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>157</LINE></EXIT>
   <LOOKUP><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>163</LINE></LOOKUP>
   <TIME><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>181</LINE></TIME>
+=======
+  <SETUP><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>18</LINE></SETUP>
+  <INTERRUPT0><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>120</LINE></INTERRUPT0>
+  <INTERRUPT1><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>83</LINE></INTERRUPT1>
+  <LOAD_Y><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>53</LINE></LOAD_Y>
+  <MAIN><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>49</LINE></MAIN>
+  <CHECK_10><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>58</LINE></CHECK_10>
+  <INC_TIME><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>69</LINE></INC_TIME>
+  <CHECK_6><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>63</LINE></CHECK_6>
+  <DO><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>74</LINE></DO>
+  <DID><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>80</LINE></DID>
+  <RESET><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>104</LINE></RESET>
+  <DONE><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>110</LINE></DONE>
+  <OUTPUT><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>150</LINE></OUTPUT>
+  <RESET_Y><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>131</LINE></RESET_Y>
+  <EXIT><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>134</LINE></EXIT>
+  <LOOKUP><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>140</LINE></LOOKUP>
+  <TIME><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab3\lab3\lab3.asm</FILE><LINE>158</LINE></TIME>
+>>>>>>> master
  </LABELS>
 </ASSEMBLER_INFO>

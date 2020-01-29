@@ -38,8 +38,6 @@ NEXT:
 	cpi r16,$00
 	breq MAIN;RESET_Z
 	; ascii
-
-
 	rcall SEND_CHAR
 	rjmp NEXT
 

@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm Fri Dec 06 10:13:37 2019
+AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm Fri Dec 06 10:34:16 2019
 
 [builtin](2): Including file 'C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR Assembler\Native\2.1.1175\avrassembler\Include\m16Adef.inc'
                  
@@ -908,8 +908,6 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\l
 00000c 3000      	cpi r16,$00
 00000d f3d9      	breq MAIN;RESET_Z
                  	; ascii
-                 
-                 
 00000e d001      	rcall SEND_CHAR
 00000f cffb      	rjmp NEXT
                  
@@ -1022,7 +1020,7 @@ AVRASM ver. 2.1.57  \\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\l
 00005a 1830
 00005b 9870
 00005c c8b8
-\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm(138): warning: .cseg .db misalignment - padding zero byte
+\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\lab2\lab2\lab2.asm(136): warning: .cseg .db misalignment - padding zero byte
 
 
 RESOURCE USE INFORMATION

@@ -6,19 +6,29 @@
  */ 
 .org $0000
 	rjmp SETUP
+<<<<<<< HEAD
 .org $0010
 	rjmp INTERRUPT1
 .org $0012
 	rjmp INTERRUPT0
 
 
+=======
+.org INT0addr
+	rjmp INTERRUPT0
+.org INT1addr
+	rjmp INTERRUPT1
+>>>>>>> master
 .equ LSEC = $100
 .equ HSEC = $101
 .equ LMIN = $102
 .equ HMIN = $103
 
+<<<<<<< HEAD
 .equ SECOND = 15624
 
+=======
+>>>>>>> master
 SETUP:
 
 	ldi r16,HIGH(RAMEND)
@@ -31,6 +41,7 @@ SETUP:
 	ldi r16,$FF
 	out DDRA,r16
 
+<<<<<<< HEAD
 	ldi r16,(1<<WGM13)|(1<<WGM12)|(1<<CS10)|(1<<CS11)
 	out TCCR1B,r16
 	ldi r16,(1<<WGM11)|(0<<WGM10)
@@ -49,12 +60,17 @@ SETUP:
 	out TCCR0,r16
 
 /*
+=======
+>>>>>>> master
 	ldi r16,(1<<ISC01)|(1<<ISC00)|(1<<ISC11)|(1<<ISC10)
 	out MCUCR, r16
 	
 	ldi r16,(1<<INT0)|(1<<INT1)
 	out GICR,r16
+<<<<<<< HEAD
 */
+=======
+>>>>>>> master
 
 	clr r3
 	clr r17
@@ -64,7 +80,11 @@ SETUP:
 	sts HSEC,r17
 	sts LMIN,r17
 	sts HMIN,r17
+<<<<<<< HEAD
 	 
+=======
+
+>>>>>>> master
 	rcall LOAD_Y
 
 	sei

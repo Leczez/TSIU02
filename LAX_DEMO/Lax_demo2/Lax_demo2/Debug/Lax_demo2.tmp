@@ -1,0 +1,29 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.1.57</VERSION>
+ <DEVICE>"ATmega16A"</DEVICE>
+ <WORKING_DIR>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\LAX_DEMO\Lax_demo2\Lax_demo2\Debug</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR Assembler\Native\2.1.1175\avrassembler\Include</DIR>
+  <DIR></DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\LAX_DEMO\Lax_demo2\Lax_demo2\Lax_demo2.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR Assembler\Native\2.1.1175\avrassembler\Include\m16Adef.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\LAX_DEMO\Lax_demo2\Lax_demo2\Debug/Lax_demo2.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>Lax_demo2.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>Lax_demo2.map</FILE>
+  <FILE>Lax_demo2.lss</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <SETUP><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\LAX_DEMO\Lax_demo2\Lax_demo2\Lax_demo2.asm</FILE><LINE>15</LINE></SETUP>
+  <INTERRUPT0><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\LAX_DEMO\Lax_demo2\Lax_demo2\Lax_demo2.asm</FILE><LINE>46</LINE></INTERRUPT0>
+  <INTERRUPT1><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\LAX_DEMO\Lax_demo2\Lax_demo2\Lax_demo2.asm</FILE><LINE>51</LINE></INTERRUPT1>
+  <MAIN><FILE>\\ad.liu.se\home\lincl896\Desktop\Laborationer\TSIU02\LAX_DEMO\Lax_demo2\Lax_demo2\Lax_demo2.asm</FILE><LINE>36</LINE></MAIN>
+ </LABELS>
+</ASSEMBLER_INFO>
